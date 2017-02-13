@@ -1,7 +1,7 @@
 pipeline:
   build:
     image: golang
-    env:
+    environment:
       - GOPATH=/drone
     commands:
       - go get github.com/gorilla/mux
