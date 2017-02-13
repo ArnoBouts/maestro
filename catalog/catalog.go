@@ -1,4 +1,4 @@
-package catalog
+package maestro
 
 import (
 	"encoding/json"

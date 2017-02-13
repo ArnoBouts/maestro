@@ -2,9 +2,8 @@ package main
 
 import (
 	"net/http"
-
-	"maestro/catalog"
-	"maestro/ldap"
+        "catalog"
+        "ldap"
 )
 
 type Route struct {
