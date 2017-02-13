@@ -4,6 +4,7 @@ pipeline:
     environment:
       - GOPATH=/drone
     commands:
+      - ls -l /drone/src
       - go get github.com/gorilla/mux
       - go get gopkg.in/ldap.v2
       - go build
