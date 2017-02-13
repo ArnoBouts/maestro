@@ -1,0 +1,13 @@
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go get
+      - go build
+
+  publish:
+    image: plugins/docker
+    registry: no-cloud.fr
+    repo: no-cloud.fr/maestro
+    tag: latest
+    file: Dockerfile
