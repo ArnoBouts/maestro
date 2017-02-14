@@ -2,8 +2,8 @@ package main
 
 import (
 	"net/http"
-        "github.com/ArnoBouts/maestro/catalog"
-        "github.com/ArnoBouts/maestro/ldap"
+        "maestro/catalog"
+        "maestro/ldap"
 )
 
 type Route struct {
