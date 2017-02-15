@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+
+  kresus:
+    #image: bnjbvr/kresus
+    build: kresus/.
+    container_name: kresus
+    networks:
+      - kresus
+    volumes:
+      - /var/lib/maestro/apps/kresus/data:/home/user/data
+    labels:
+      - traefik.enable=false
+
+  kresus-nginx:
+    #image: nginx
+    build: nginx/.
+    container_name: kresus-nginx
+    networks:
+      - kresus
+      - ldap
+      - traefik
+    labels:
+      - traefik.port=80
+      - traefik.frontend.rule=Host:kresus.no-cloud.fr
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.entryPoints=http,https
+      - traefik.docker.network=traefik_default
+
+networks:
+  kresus:
+    driver: bridge
+  ldap:
+    external:
+      name: maestro_ldap
+  traefik:
+    external:
+      name: traefik_default

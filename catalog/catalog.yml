@@ -1,0 +1,9 @@
+services:
+  traefik:
+    display_name: Traefik
+
+  ldap:
+    display_name: Ldap
+
+  kresus:
+    display_name: Kresus  

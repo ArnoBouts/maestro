@@ -1,14 +1,18 @@
 workspace:
   base: /go
-  path: src/maestro
+  path: .
 
 pipeline:
   build:
     image: golang
     commands:
+      - ls -l /go
+      - ls -l /go/src
+      - ls -l /go/src/maestro
       - go get github.com/gorilla/mux
       - go get gopkg.in/ldap.v2
-      - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o maestro
+      - go get gopkg.in/yaml.v2
+      - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o maestro maestro
 
   publish:
     image: plugins/docker

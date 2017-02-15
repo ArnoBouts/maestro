@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+
+  ldap:
+    image: osixia/openldap
+    container_name: ldap
+    networks:
+      ldap:
+    environment:
+      - LDAP_ORGANISATION=home
+      - LDAP_DOMAIN=home
+    volumes:
+      - ldap:/var/lib/ldap
+      - ldap:/etc/ldap/slapd.d
+    labels:
+      - traefik.enable=false
+
+volumes:
+  ldap:
+    driver: local
