@@ -1,9 +1,11 @@
 services:
   traefik:
     display_name: Traefik
+    required: true
 
   ldap:
     display_name: Ldap
+    required: true
 
   kresus:
     display_name: Kresus  

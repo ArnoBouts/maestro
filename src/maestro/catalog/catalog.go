@@ -13,6 +13,7 @@ type Catalog struct {
 
 type Service struct {
         DisplayName string `yaml:"display_name"`
+        Required boolean
 	//Params []Param
 }
 
