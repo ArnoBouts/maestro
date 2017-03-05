@@ -4,7 +4,7 @@ services:
 
   ldap:
     image: osixia/openldap
-    container_name: ldap
+    container_name: ldap_test
     networks:
       ldap:
     environment:
@@ -19,3 +19,7 @@ services:
 volumes:
   ldap:
     driver: local
+
+networks:
+  ldap:
+    driver: bridge
