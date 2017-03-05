@@ -12,6 +12,11 @@ pipeline:
       - go get github.com/gorilla/mux
       - go get gopkg.in/ldap.v2
       - go get gopkg.in/yaml.v2
+      - go get golang.org/x/net/context
+      - go get github.com/docker/libcompose/docker
+      - go get github.com/docker/libcompose/docker/ctx
+      - go get github.com/docker/libcompose/project
+      - go get github.com/docker/libcompose/project/options
       - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o maestro maestro
 
   publish:
