@@ -1,4 +1,4 @@
-FROM scratch
+FROM debian:jessie
 
 WORKDIR /maestro
 
