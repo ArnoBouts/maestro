@@ -1,6 +1,6 @@
 FROM scratch
 
-WORKINGDIR /maestro
+WORKDIR /maestro
 
 COPY maestro /maestro/
 COPY catalog /maestro/catalog/
