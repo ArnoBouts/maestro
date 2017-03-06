@@ -58,6 +58,20 @@ func getProject(service string) (project.APIProject, error) {
 	return project, err
 }
 
+func Info(writer http.ResponseWriter, request *http.Request) {
+	service := mux.Vars(request)["service"]
+	project, err := getProject(service)
+	if err != nil {
+		log.Fatal(err)
+	}
+	payload, err := json.Marshal(project)
+	if err != nil {
+		http.Error(writer, err.Error(), 500)
+	}
+	writer.Header().Add("Content-Type", "application/json")
+	writer.Write(payload)
+}
+
 //StartService call start method on compose service
 func StartService(writer http.ResponseWriter, request *http.Request) {
 
