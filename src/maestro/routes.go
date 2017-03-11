@@ -18,10 +18,11 @@ type Routes []Route
 var routes = Routes{
 	Route{"Catalog", "GET", "/catalog", catalog.List},
 	Route{"Catalog", "GET", "/catalog/{service}/info", catalog.Info},
-	Route{"Catalog", "PATCH", "/catalog/{service}/start", catalog.StartService},
-	Route{"Catalog", "PATCH", "/catalog/{service}/stop", catalog.StopService},
-	Route{"Catalog", "PATCH", "/catalog/{service}/up", catalog.UpService},
-	Route{"Catalog", "PATCH", "/catalog/{service}/down", catalog.DownService},
+	Route{"Catalog", "POST", "/services/{service}/install", AddService},
+	Route{"Catalog", "PATCH", "/services/{service}/start", StartService},
+	Route{"Catalog", "PATCH", "/services/{service}/stop", StopService},
+	Route{"Catalog", "PATCH", "/services/{service}/up", UpService},
+	Route{"Catalog", "PATCH", "/services/{service}/down", DownService},
 
 	Route{"Persons", "GET", "/persons", ldap.Persons},
 	Route{"Persons", "POST", "/persons", ldap.AddPerson},

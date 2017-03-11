@@ -3,9 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"maestro/catalog"
 )
 
+var c catalog.Catalog
+
 func main() {
+
+	c = catalog.Load()
+
+	Load()
 
 	router := NewRouter()
 
