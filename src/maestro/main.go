@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"maestro/catalog"
+	"os"
+	"path"
 )
 
 var c catalog.Catalog
