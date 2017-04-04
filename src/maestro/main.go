@@ -8,7 +8,7 @@ import (
 	"path"
 )
 
-var c catalog.Catalog
+var workdir string
 
 func main() {
 
@@ -16,10 +16,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	exPath := path.Dir(ex)
-	log.Print(exPath)
+	workdir = path.Dir(ex)
 
-	c = catalog.Load()
+	catalog.Load(workdir)
 
 	Load()
 

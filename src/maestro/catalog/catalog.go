@@ -29,31 +29,24 @@ type App struct {
 	//Params []Param
 }
 
-func Load() Catalog {
-	content, err := ioutil.ReadFile("catalog/catalog.yml")
+var c Catalog
+
+func Load(workdir string) {
+	content, err := ioutil.ReadFile(workdir + "/catalog/catalog.yml")
 	if err != nil {
 		log.Print(err)
-		return Catalog{}
+		return
 	}
-	var catalog Catalog
-	yaml.Unmarshal(content, &catalog)
+	yaml.Unmarshal(content, &c)
 
-	log.Print(catalog)
-
-	return catalog
+	log.Print(c)
 }
 
 
 // List return Services provided by the catalog
 func List(writer http.ResponseWriter, request *http.Request) {
-	content, err := ioutil.ReadFile("catalog/catalog.yml")
-	if err != nil {
-		http.Error(writer, err.Error(), 500)
-	}
-	var catalog Catalog
-	yaml.Unmarshal(content, &catalog)
 
-	payload, err := json.Marshal(catalog)
+	payload, err := json.Marshal(c)
 	if err != nil {
 		http.Error(writer, err.Error(), 500)
 	}
@@ -64,7 +57,7 @@ func List(writer http.ResponseWriter, request *http.Request) {
 func getProject(service string) (project.APIProject, error) {
 	project, err := docker.NewProject(&ctx.Context{
 		Context: project.Context{
-			ComposeFiles: []string{"catalog/" + service + "/docker-compose.yml"},
+			ComposeFiles: []string{"/catalog/" + service + "/docker-compose.yml"},
 			ProjectName:  service,
 		},
 	}, nil)

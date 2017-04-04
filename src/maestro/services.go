@@ -32,7 +32,7 @@ var m = new(maestro)
 func Load() {
 
 	// load from file
-        content, err := ioutil.ReadFile("services/services.yml")
+        content, err := ioutil.ReadFile(workdir + "/services/services.yml")
 	if err != nil {
                 log.Print("Unable to read services file")
 		return
@@ -59,13 +59,13 @@ func Save() {
 	log.Print(m)
 
 	content, _ := yaml.Marshal(&m)
-	ioutil.WriteFile("services/services.yml", content, 0644)
+	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
 }
 
 func add(name string) {
 	log.Print("Install service '" + name + "'")
 
-        compose, err := ioutil.ReadFile("catalog/" + name + "/docker-compose.yml")
+        compose, err := ioutil.ReadFile(workdir + "/catalog/" + name + "/docker-compose.yml")
         if err != nil {
                 log.Fatal(err)
         }
@@ -73,11 +73,11 @@ func add(name string) {
 	//app := c.Apps[name]
 
 	// copy the docker-compose.yml
-	err = os.Mkdir("services/" + name, 0777)
+	err = os.Mkdir(workdir + "/services/" + name, 0777)
         if err != nil {
                 log.Fatal(err)
         }
-	err = ioutil.WriteFile("services/" + name + "/docker-compose.yml", []byte(compose), 0644)
+	err = ioutil.WriteFile(workdir + "/services/" + name + "/docker-compose.yml", []byte(compose), 0644)
         if err != nil {
                 log.Fatal(err)
         }
@@ -97,7 +97,7 @@ func add(name string) {
 func getProject(service string) (project.APIProject, error) {
 	project, err := docker.NewProject(&ctx.Context{
 		Context: project.Context{
-			ComposeFiles: []string{"services/" + service + "/docker-compose.yml"},
+			ComposeFiles: []string{workdir + "/services/" + service + "/docker-compose.yml"},
 			ProjectName:  service,
 		},
 	}, nil)
