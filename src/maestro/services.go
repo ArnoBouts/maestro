@@ -34,7 +34,8 @@ func Load() {
 	// load from file
         content, err := ioutil.ReadFile("services/services.yml")
 	if err != nil {
-                log.Fatal("Unable to read services file")
+                log.Print("Unable to read services file")
+		return
         }
 
 	yaml.Unmarshal(content, &m)
