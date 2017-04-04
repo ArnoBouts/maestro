@@ -111,7 +111,7 @@ func loadPersons() ([]Person, error) {
 	}
 	defer l.Close()
 
-	err = l.Bind("cn=admin,dc=home", "admin")
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func addPerson(p Person) error {
 	}
 	defer l.Close()
 
-	err = l.Bind("cn=admin,dc=home", "admin")
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func deletePerson(dn string) error {
 	}
 	defer l.Close()
 
-	err = l.Bind("cn=admin,dc=home", "admin")
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func editPerson(dn string, p Person) error {
 	}
 	defer l.Close()
 
-	err = l.Bind("cn=admin,dc=home", "admin")
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func grantService(dn string, serviceDn string, allow bool) error {
 	}
 	defer l.Close()
 
-	err = l.Bind("cn=admin,dc=home", "admin")
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
 	if err != nil {
 		return err
 	}
