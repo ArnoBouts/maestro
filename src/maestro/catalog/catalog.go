@@ -33,7 +33,7 @@ func Load() Catalog {
 	content, err := ioutil.ReadFile("catalog/catalog.yml")
 	if err != nil {
 		log.Print(err)
-		return nil
+		return Catalog{}
 	}
 	var catalog Catalog
 	yaml.Unmarshal(content, &catalog)
