@@ -10,6 +10,13 @@ var c catalog.Catalog
 
 func main() {
 
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := path.Dir(ex)
+	log.Print(exPath)
+
 	c = catalog.Load()
 
 	Load()
