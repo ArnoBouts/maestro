@@ -32,7 +32,8 @@ type App struct {
 func Load() Catalog {
 	content, err := ioutil.ReadFile("catalog/catalog.yml")
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return nil
 	}
 	var catalog Catalog
 	yaml.Unmarshal(content, &catalog)
