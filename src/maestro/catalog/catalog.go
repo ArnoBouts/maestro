@@ -32,7 +32,7 @@ type App struct {
 func Load() Catalog {
 	content, err := ioutil.ReadFile("catalog/catalog.yml")
 	if err != nil {
-		log.Error(err)
+		log.Print(err)
 		return nil
 	}
 	var catalog Catalog
