@@ -104,6 +104,22 @@ func getProject(service string) (project.APIProject, error) {
 	return project, err
 }
 
+func (service *Service) Info() {
+
+        project, err := getProject(service.Name)
+
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        info, err := project.Ps(context.Background())
+
+        if err != nil {
+                log.Print(err)
+        }
+	log.Print(info)
+}
+
 //StartService call start method on compose service
 func (service *Service) Start() {
 
@@ -166,6 +182,13 @@ func (service *Service) Down() {
         if err != nil {
                 log.Fatal(err)
         }
+}
+
+//InfoService call info method on compose service
+func InfoService(writer http.ResponseWriter, request *http.Request) {
+
+	service := m.Services[mux.Vars(request)["service"]]
+	service.Info()
 }
 
 //StartService call start method on compose service

@@ -17,7 +17,7 @@ type Routes []Route
 
 var routes = Routes{
 	Route{"Catalog", "GET", "/catalog", catalog.List},
-	Route{"Catalog", "GET", "/catalog/{service}/info", catalog.Info},
+	Route{"Catalog", "GET", "/services/{service}/info", InfoService},
 	Route{"Catalog", "POST", "/services/{service}/install", AddService},
 	Route{"Catalog", "PATCH", "/services/{service}/start", StartService},
 	Route{"Catalog", "PATCH", "/services/{service}/stop", StopService},
