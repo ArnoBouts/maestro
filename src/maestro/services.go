@@ -188,6 +188,8 @@ func (service *Service) Down() {
 //InfoService call info method on compose service
 func InfoService(writer http.ResponseWriter, request *http.Request) {
 
+	log.Println(m)
+
 	service := m.Services[mux.Vars(request)["service"]]
 	service.Info()
 }
