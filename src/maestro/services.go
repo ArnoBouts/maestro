@@ -39,6 +39,8 @@ func Load() {
         }
 
 	yaml.Unmarshal(content, &m)
+	log.Print("M : ")
+	log.Println(m)
 
 	if(m.Services == nil) {
 		m.Services = make(map[string](*Service))
@@ -56,6 +58,7 @@ func Load() {
 
 func Save() {
 
+	log.Print("M : ")
 	log.Println(m)
 
 	content, _ := yaml.Marshal(&m)
@@ -87,6 +90,9 @@ func add(name string) {
 	// add service to maestro
 	var service Service
 	service.Name = name
+	if(m.Services == nil) {
+		m.Services = make(map[string](*Service))
+	}
 	m.Services[name] = &service
 	Save()
 	
