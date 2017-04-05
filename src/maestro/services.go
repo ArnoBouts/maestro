@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -110,21 +111,16 @@ func getProject(service string) (project.APIProject, error) {
 	return project, err
 }
 
-func (service *Service) Info() {
+func (service *Service) Info() (project.InfoSet, error) {
 
         project, err := getProject(service.Name)
 
         if err != nil {
-                log.Fatal(err)
+                return nil, err
         }
 
         info, err := project.Ps(context.Background())
-
-        if err != nil {
-                log.Println(err)
-        }
-	log.Print("Infos : ")
-	log.Println(info)
+	return info, err
 }
 
 //StartService call start method on compose service
@@ -194,10 +190,20 @@ func (service *Service) Down() {
 //InfoService call info method on compose service
 func InfoService(writer http.ResponseWriter, request *http.Request) {
 
-	log.Println(m)
-
 	service := m.Services[mux.Vars(request)["service"]]
-	service.Info()
+	info, err := service.Info()
+        if err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+
+	payload, err := json.Marshal(info)
+        if err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+	writer.Header().Add("Content-Type", "application/json")
+	writer.Write(payload)
 }
 
 //StartService call start method on compose service
