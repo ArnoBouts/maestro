@@ -34,7 +34,7 @@ func Load() {
 	// load from file
         content, err := ioutil.ReadFile(workdir + "/services/services.yml")
 	if err != nil {
-                log.Print("Unable to read services file")
+                log.Println("Unable to read services file")
 		return
         }
 
@@ -50,20 +50,20 @@ func Load() {
 		if(service.Enable) {
 			service.Start()
 		}
-		log.Print(service)
+		log.Println(service)
 	}
 }
 
 func Save() {
 
-	log.Print(m)
+	log.Println(m)
 
 	content, _ := yaml.Marshal(&m)
 	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
 }
 
 func add(name string) {
-	log.Print("Install service '" + name + "'")
+	log.Println("Install service '" + name + "'")
 
         compose, err := ioutil.ReadFile(workdir + "/catalog/" + name + "/docker-compose.yml")
         if err != nil {
@@ -115,9 +115,10 @@ func (service *Service) Info() {
         info, err := project.Ps(context.Background())
 
         if err != nil {
-                log.Print(err)
+                log.Println(err)
         }
-	log.Print(info)
+	log.Print("Infos : ")
+	log.Println(info)
 }
 
 //StartService call start method on compose service
@@ -132,7 +133,7 @@ func (service *Service) Start() {
         err = project.Start(context.Background())
 
         if err != nil {
-                log.Print(err)
+                log.Println(err)
         }
 }
 
@@ -197,7 +198,7 @@ func StartService(writer http.ResponseWriter, request *http.Request) {
 	service := m.Services[mux.Vars(request)["service"]]
 	service.Start()
 	service.Enable = true
-	log.Print(service)
+	log.Println(service)
 	Save()
 }
 
