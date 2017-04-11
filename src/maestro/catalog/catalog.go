@@ -8,13 +8,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"golang.org/x/net/context"
-
-	"github.com/docker/libcompose/docker"
-	"github.com/docker/libcompose/docker/ctx"
-	"github.com/docker/libcompose/project"
-
-	"github.com/gorilla/mux"
 )
 
 // Catalog define the catalog
@@ -52,25 +45,4 @@ func List(writer http.ResponseWriter, request *http.Request) {
 	}
 	writer.Header().Add("Content-Type", "application/json")
 	writer.Write(payload)
-}
-
-func getProject(service string) (project.APIProject, error) {
-	project, err := docker.NewProject(&ctx.Context{
-		Context: project.Context{
-			ComposeFiles: []string{"/catalog/" + service + "/docker-compose.yml"},
-			ProjectName:  service,
-		},
-	}, nil)
-
-	return project, err
-}
-
-func Info(writer http.ResponseWriter, request *http.Request) {
-	service := mux.Vars(request)["service"]
-	project, err := getProject(service)
-	if err != nil {
-		log.Fatal(err)
-	}
-	info, err := project.Ps(context.Background())
-	log.Print(info)
 }

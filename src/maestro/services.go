@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"net/http"
+	"strings"
 
         "gopkg.in/yaml.v2"
 
@@ -26,6 +27,7 @@ type maestro struct {
 type Service struct {
 	Name string
 	Enable bool
+	Params map[string](string)
 }
 
 var m = new(maestro)
@@ -66,13 +68,18 @@ func Save() {
 	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
 }
 
-func add(name string) {
+func add(name string, params map[string](string)) {
 	log.Println("Install service '" + name + "'")
 
-        compose, err := ioutil.ReadFile(workdir + "/catalog/" + name + "/docker-compose.yml")
+        c, err := ioutil.ReadFile(workdir + "/catalog/" + name + "/docker-compose.yml")
         if err != nil {
                 log.Fatal(err)
         }
+
+	compose := string(c)
+	for k, v := range params {
+		compose = strings.Replace(compose, "{{" + k + "}}", v, -1)
+	}
 
 	//app := c.Apps[name]
 
@@ -91,6 +98,7 @@ func add(name string) {
 	// add service to maestro
 	var service Service
 	service.Name = name
+	service.Params = params
 	if(m.Services == nil) {
 		m.Services = make(map[string](*Service))
 	}
@@ -245,5 +253,14 @@ func DownService(writer http.ResponseWriter, request *http.Request) {
 
 func AddService(writer http.ResponseWriter, request *http.Request) {
 	name := mux.Vars(request)["service"]
-	add(name)
+
+	var params map[string](string)
+	decoder := json.NewDecoder(request.Body)
+	if err := decoder.Decode(&params); err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+	defer request.Body.Close()
+
+	add(name, params)
 }
