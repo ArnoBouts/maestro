@@ -18,6 +18,8 @@ import (
         "github.com/docker/libcompose/project/options"
 
         "github.com/gorilla/mux"
+
+	"maestro/catalog"
 )
 
 type maestro struct {
@@ -27,6 +29,7 @@ type maestro struct {
 type Service struct {
 	Name string
 	Enable bool
+	Checksum string
 	Params map[string](string)
 }
 
@@ -59,6 +62,19 @@ func Load() {
 	}
 }
 
+func checkComposeUpdates() {
+	
+	// for all enabled services, check with sha256 if compose was updated in the catalog
+	for name, service := range m.Services {
+		if(service.Enable) {
+			sha, _ := catalog.ComposeSha256(name)
+			if service.Checksum != sha {
+				log.Println(name + " compose file need to be updated")
+			}
+		}
+	}
+}
+
 func Save() {
 
 	log.Print("M : ")
@@ -68,37 +84,26 @@ func Save() {
 	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
 }
 
-func add(name string, params map[string](string)) {
+func add(name string, params map[string](string)) error {
 	log.Println("Install service '" + name + "'")
 
-        c, err := ioutil.ReadFile(workdir + "/catalog/" + name + "/docker-compose.yml")
-        if err != nil {
-                log.Fatal(err)
-        }
-
-	compose := string(c)
-	for k, v := range params {
-		compose = strings.Replace(compose, "{{" + k + "}}", v, -1)
-	}
-
-	//app := c.Apps[name]
-
-	// copy the docker-compose.yml
-	err = os.Mkdir(workdir + "/services/" + name, 0777)
-        if err != nil {
-                log.Fatal(err)
-        }
-	err = ioutil.WriteFile(workdir + "/services/" + name + "/docker-compose.yml", []byte(compose), 0644)
-        if err != nil {
-                log.Fatal(err)
-        }
-
-	// save parameters
-
-	// add service to maestro
+	// create service
 	var service Service
 	service.Name = name
 	service.Params = params
+
+	compose, err := catalog.ComposeFile(service.Name)
+	if err != nil {
+		return err
+	}
+
+	// write service compose file	
+	err = service.writeCompose(compose)
+	if err != nil {
+		return err
+	}
+
+	// add service to maestro
 	if(m.Services == nil) {
 		m.Services = make(map[string](*Service))
 	}
@@ -106,7 +111,19 @@ func add(name string, params map[string](string)) {
 	Save()
 	
 	// up compose
-	service.Up()
+	return service.Up()
+}
+
+func (service *Service) writeCompose(compose string) error {
+
+	for k, v := range service.Params {
+		compose = strings.Replace(compose, "{{" + k + "}}", v, -1)
+	}
+
+	if err := os.Mkdir(workdir + "/services/" + service.Name, 0777); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(workdir + "/services/" + service.Name + "/docker-compose.yml", []byte(compose), 0644)
 }
 
 func getProject(service string) (project.APIProject, error) {
@@ -122,77 +139,74 @@ func getProject(service string) (project.APIProject, error) {
 func (service *Service) Info() (project.InfoSet, error) {
 
         project, err := getProject(service.Name)
-
-        if err != nil {
-                return nil, err
+	if err != nil {
+		return nil, err
         }
 
-        info, err := project.Ps(context.Background())
-	return info, err
+        return project.Ps(context.Background())
 }
 
 //StartService call start method on compose service
-func (service *Service) Start() {
+func (service *Service) Start() error {
 
         project, err := getProject(service.Name)
-
-        if err != nil {
-                log.Fatal(err)
+	if err != nil {
+		return err
         }
 
-        err = project.Start(context.Background())
-
-        if err != nil {
-                log.Println(err)
-        }
+        return project.Start(context.Background())
 }
 
 //StopService call stop method on compose service
-func (service *Service) Stop() {
+func (service *Service) Stop() error {
 
         project, err := getProject(service.Name)
-
-        if err != nil {
-                log.Fatal(err)
+	if err != nil {
+		return err
         }
 
-        err = project.Stop(context.Background(), 10000)
-
-        if err != nil {
-                log.Fatal(err)
-        }
+        return project.Stop(context.Background(), 10000)
 }
 
 //UpService call up method on compose service
-func (service *Service) Up() {
+func (service *Service) Up() error {
 
         project, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
 
-        if err != nil {
-                log.Fatal(err)
-        }
-
-        err = project.Up(context.Background(), options.Up{})
-
-        if err != nil {
-                log.Fatal(err)
-        }
+        return project.Up(context.Background(), options.Up{})
 }
 
 //DownService call down method on compose service
-func (service *Service) Down() {
+func (service *Service) Down() error {
 
-        project, err := getProject(service.Name)
+	project, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
 
-        if err != nil {
-                log.Fatal(err)
+        return project.Down(context.Background(), options.Down{})
+}
+
+func (service *Service) UpdateCompose() error {
+
+	if err := service.Down(); err != nil {
+		return err
+	}
+
+        compose, err := catalog.ComposeFile(service.Name)
+	if err != nil {
+                return err
         }
 
-        err = project.Down(context.Background(), options.Down{})
-
-        if err != nil {
-                log.Fatal(err)
+        // write service compose file
+        if err := service.writeCompose(compose); err != nil {
+                return err
         }
+
+	return service.Up()
 }
 
 //InfoService call info method on compose service
@@ -262,5 +276,8 @@ func AddService(writer http.ResponseWriter, request *http.Request) {
 	}
 	defer request.Body.Close()
 
-	add(name, params)
+	if err := add(name, params); err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
 }
