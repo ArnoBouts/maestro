@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"os"
 	"net/http"
+	"os"
 	"strings"
 
-        "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
-        "golang.org/x/net/context"
+	"golang.org/x/net/context"
 
-        "github.com/docker/libcompose/docker"
-        "github.com/docker/libcompose/docker/ctx"
-        "github.com/docker/libcompose/project"
-        "github.com/docker/libcompose/project/options"
+	"github.com/docker/libcompose/docker"
+	"github.com/docker/libcompose/docker/ctx"
+	"github.com/docker/libcompose/project"
+	"github.com/docker/libcompose/project/options"
 
-        "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 
 	"maestro/catalog"
 )
@@ -26,47 +26,50 @@ type maestro struct {
 	Services map[string](*Service)
 }
 
+// Service is an installed service
 type Service struct {
-	Name string
-	Enable bool
+	Name     string
+	Enable   bool
 	Checksum string
-	Params map[string](string)
+	Params   map[string](string)
 }
 
 var m = new(maestro)
 
+// Load installed service descriptor file
 func Load() {
 
-        log.Println("Loading services descriptor file")
+	log.Println("Loading services descriptor file")
 
 	// load from file
-        content, err := ioutil.ReadFile(workdir + "/services/services.yml")
+	content, err := ioutil.ReadFile(workdir + "/services/services.yml")
 	if err != nil {
-                log.Println("Unable to read services descriptor file")
+		log.Println("Unable to read services descriptor file")
 		return
-        }
+	}
 
 	yaml.Unmarshal(content, &m)
 
-	if(m.Services == nil) {
+	if m.Services == nil {
 		m.Services = make(map[string](*Service))
 	}
 
 	// start all that should
 	for name, service := range m.Services {
 		service.Name = name
-		if(service.Enable) {
-			service.Start()
+		if service.Enable {
+			service.start()
 		}
 		log.Println(service)
 	}
 }
 
+// CheckComposeUpdates check for each service is the compose file was updated
 func CheckComposeUpdates() {
-	
+
 	// for all enabled services, check with sha256 if compose was updated in the catalog
 	for name, service := range m.Services {
-		if(service.Enable) {
+		if service.Enable {
 			sha, _ := catalog.ComposeSha256(name)
 			if service.Checksum != sha {
 				log.Println(name + " compose file need to be updated")
@@ -75,10 +78,11 @@ func CheckComposeUpdates() {
 	}
 }
 
+// Save save the services descriptor file
 func Save() {
 
 	content, _ := yaml.Marshal(&m)
-	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
+	ioutil.WriteFile(workdir+"/services/services.yml", content, 0644)
 }
 
 func add(name string, params map[string](string)) error {
@@ -94,33 +98,33 @@ func add(name string, params map[string](string)) error {
 		return err
 	}
 
-	// write service compose file	
+	// write service compose file
 	err = service.writeCompose(compose)
 	if err != nil {
 		return err
 	}
 
 	// add service to maestro
-	if(m.Services == nil) {
+	if m.Services == nil {
 		m.Services = make(map[string](*Service))
 	}
 	m.Services[name] = &service
 	Save()
-	
+
 	// up compose
-	return service.Up()
+	return service.up()
 }
 
 func (service *Service) writeCompose(compose string) error {
 
 	for k, v := range service.Params {
-		compose = strings.Replace(compose, "{{" + k + "}}", v, -1)
+		compose = strings.Replace(compose, "{{"+k+"}}", v, -1)
 	}
 
-	if err := os.Mkdir(workdir + "/services/" + service.Name, 0777); err != nil {
+	if err := os.Mkdir(workdir+"/services/"+service.Name, 0777); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(workdir + "/services/" + service.Name + "/docker-compose.yml", []byte(compose), 0644)
+	return ioutil.WriteFile(workdir+"/services/"+service.Name+"/docker-compose.yml", []byte(compose), 0644)
 }
 
 func getProject(service string) (project.APIProject, error) {
@@ -133,27 +137,26 @@ func getProject(service string) (project.APIProject, error) {
 	return project, err
 }
 
-func (service *Service) Info() (project.InfoSet, error) {
+func (service *Service) info() (project.InfoSet, error) {
 
-        project, err := getProject(service.Name)
+	project, err := getProject(service.Name)
 	if err != nil {
 		return nil, err
-        }
+	}
 
-        return project.Ps(context.Background())
+	return project.Ps(context.Background())
 }
 
-//StartService call start method on compose service
-func (service *Service) Start() error {
+func (service *Service) start() error {
 
 	log.Printf("Start service '%s'\n", service.Name)
 
-        project, err := getProject(service.Name)
+	project, err := getProject(service.Name)
 	if err != nil {
 		return err
-        }
+	}
 
-        err = project.Start(context.Background())
+	err = project.Start(context.Background())
 
 	if err != nil {
 		log.Printf("Service '%s' starting failed\n", service.Name)
@@ -164,70 +167,67 @@ func (service *Service) Start() error {
 	return err
 }
 
-//StopService call stop method on compose service
-func (service *Service) Stop() error {
-
-        project, err := getProject(service.Name)
-	if err != nil {
-		return err
-        }
-
-        return project.Stop(context.Background(), 10000)
-}
-
-//UpService call up method on compose service
-func (service *Service) Up() error {
-
-        project, err := getProject(service.Name)
-	if err != nil {
-		return err
-	}
-
-        return project.Up(context.Background(), options.Up{})
-}
-
-//DownService call down method on compose service
-func (service *Service) Down() error {
+func (service *Service) stop() error {
 
 	project, err := getProject(service.Name)
 	if err != nil {
 		return err
 	}
 
-        return project.Down(context.Background(), options.Down{})
+	return project.Stop(context.Background(), 10000)
 }
 
-func (service *Service) UpdateCompose() error {
+func (service *Service) up() error {
 
-	if err := service.Down(); err != nil {
+	project, err := getProject(service.Name)
+	if err != nil {
 		return err
 	}
 
-        compose, err := catalog.ComposeFile(service.Name)
-	if err != nil {
-                return err
-        }
-
-        // write service compose file
-        if err := service.writeCompose(compose); err != nil {
-                return err
-        }
-
-	return service.Up()
+	return project.Up(context.Background(), options.Up{})
 }
 
-//InfoService call info method on compose service
+func (service *Service) down() error {
+
+	project, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
+
+	return project.Down(context.Background(), options.Down{})
+}
+
+func (service *Service) updateCompose() error {
+
+	if err := service.down(); err != nil {
+		return err
+	}
+
+	compose, err := catalog.ComposeFile(service.Name)
+	if err != nil {
+		return err
+	}
+
+	// write service compose file
+	if err := service.writeCompose(compose); err != nil {
+		return err
+	}
+
+	return service.up()
+}
+
+// InfoService Resource that return provided service infos
 func InfoService(writer http.ResponseWriter, request *http.Request) {
 
 	service := m.Services[mux.Vars(request)["service"]]
-	info, err := service.Info()
-        if err != nil {
+	info, err := service.info()
+	if err != nil {
 		http.Error(writer, err.Error(), 500)
 		return
 	}
 
 	payload, err := json.Marshal(info)
-        if err != nil {
+	if err != nil {
 		http.Error(writer, err.Error(), 500)
 		return
 	}
@@ -235,42 +235,43 @@ func InfoService(writer http.ResponseWriter, request *http.Request) {
 	writer.Write(payload)
 }
 
-//StartService call start method on compose service
+// StartService Resource that start the provided service
 func StartService(writer http.ResponseWriter, request *http.Request) {
 
 	service := m.Services[mux.Vars(request)["service"]]
-	service.Start()
+	service.start()
 	service.Enable = true
 	Save()
 }
 
-//StopService call stop method on compose service
+// StopService Resource that stop the provided service
 func StopService(writer http.ResponseWriter, request *http.Request) {
 
 	service := m.Services[mux.Vars(request)["service"]]
-	service.Stop()
+	service.stop()
 	service.Enable = false
 	Save()
 }
 
-//UpService call up method on compose service
+// UpService Resource that up the provided service
 func UpService(writer http.ResponseWriter, request *http.Request) {
 
 	var service Service
-        service.Name = mux.Vars(request)["service"]
+	service.Name = mux.Vars(request)["service"]
 
-	service.Up()
+	service.up()
 }
 
-//DownService call down method on compose service
+// DownService Resource that down the provided service
 func DownService(writer http.ResponseWriter, request *http.Request) {
 
 	var service Service
-        service.Name = mux.Vars(request)["service"]
+	service.Name = mux.Vars(request)["service"]
 
-	service.Down()
+	service.down()
 }
 
+// AddService Resource that install the provided service
 func AddService(writer http.ResponseWriter, request *http.Request) {
 	name := mux.Vars(request)["service"]
 
