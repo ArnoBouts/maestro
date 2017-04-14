@@ -37,16 +37,16 @@ var m = new(maestro)
 
 func Load() {
 
+        log.Println("Loading services descriptor file")
+
 	// load from file
         content, err := ioutil.ReadFile(workdir + "/services/services.yml")
 	if err != nil {
-                log.Println("Unable to read services file")
+                log.Println("Unable to read services descriptor file")
 		return
         }
 
 	yaml.Unmarshal(content, &m)
-	log.Print("M : ")
-	log.Println(m)
 
 	if(m.Services == nil) {
 		m.Services = make(map[string](*Service))
@@ -62,7 +62,7 @@ func Load() {
 	}
 }
 
-func checkComposeUpdates() {
+func CheckComposeUpdates() {
 	
 	// for all enabled services, check with sha256 if compose was updated in the catalog
 	for name, service := range m.Services {
@@ -76,9 +76,6 @@ func checkComposeUpdates() {
 }
 
 func Save() {
-
-	log.Print("M : ")
-	log.Println(m)
 
 	content, _ := yaml.Marshal(&m)
 	ioutil.WriteFile(workdir + "/services/services.yml", content, 0644)
@@ -149,12 +146,22 @@ func (service *Service) Info() (project.InfoSet, error) {
 //StartService call start method on compose service
 func (service *Service) Start() error {
 
+	log.Printf("Start service '%s'\n", service.Name)
+
         project, err := getProject(service.Name)
 	if err != nil {
 		return err
         }
 
-        return project.Start(context.Background())
+        err = project.Start(context.Background())
+
+	if err != nil {
+		log.Printf("Service '%s' starting failed\n", service.Name)
+	} else {
+		log.Printf("Service '%s' started\n", service.Name)
+	}
+
+	return err
 }
 
 //StopService call stop method on compose service
@@ -234,7 +241,6 @@ func StartService(writer http.ResponseWriter, request *http.Request) {
 	service := m.Services[mux.Vars(request)["service"]]
 	service.Start()
 	service.Enable = true
-	log.Println(service)
 	Save()
 }
 
