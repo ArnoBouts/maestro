@@ -22,6 +22,8 @@ func main() {
 
 	Load()
 
+	CheckComposeUpdates()
+
 	router := NewRouter()
 
 	log.Fatal(http.ListenAndServe(":8888", router))
