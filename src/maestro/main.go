@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"maestro/catalog"
+	"net/http"
 	"os"
 	"path"
 )
@@ -21,6 +21,8 @@ func main() {
 	catalog.Load(workdir)
 
 	Load()
+
+	CheckImageToUpdate()
 
 	CheckComposeUpdates()
 

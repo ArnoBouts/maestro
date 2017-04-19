@@ -12,8 +12,13 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/docker/libcompose/docker"
+	"github.com/docker/docker/client"
+	"github.com/docker/libcompose/config"
+	composeclient "github.com/docker/libcompose/docker/client"
+	"github.com/docker/libcompose/docker/container"
 	"github.com/docker/libcompose/docker/ctx"
+	"github.com/docker/libcompose/docker/image"
+	"github.com/docker/libcompose/labels"
 	"github.com/docker/libcompose/project"
 	"github.com/docker/libcompose/project/options"
 
@@ -78,6 +83,99 @@ func CheckComposeUpdates() {
 	}
 }
 
+// PullServices pull all services images
+func PullServices() {
+
+	for _, service := range m.Services {
+		if service.Enable {
+			service.pull()
+		}
+	}
+}
+
+func CheckImageToUpdate() {
+
+	for _, service := range m.Services {
+		//if service.Enable {
+
+		service.checkImageToUpdate()
+		//}
+	}
+}
+
+func (service *Service) checkImageToUpdate() error {
+
+	p, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
+
+	for _, name := range p.ServiceConfigs.Keys() {
+		service, _ := p.CreateService(name)
+		containers, _ := collectContainers(context.Background(), p, service)
+
+		for _, c := range containers {
+			outOfSync, err := outOfSync(context.Background(), c, service)
+			if err != nil {
+				return err
+			}
+
+			if outOfSync {
+				log.Printf("%s is out of sync", name)
+			}
+		}
+	}
+
+	return nil
+}
+
+func collectContainers(ctx context.Context, p project.Project, s project.Service) ([]*container.Container, error) {
+	client, _ := composeclient.Create(composeclient.Options{})
+	containers, err := container.ListByFilter(ctx, client, labels.SERVICE.Eq(s.Name()), labels.PROJECT.Eq(p.Name))
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*container.Container{}
+
+	for _, cont := range containers {
+		c, err := container.New(ctx, client, cont.ID)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, c)
+	}
+
+	return result, nil
+}
+
+func outOfSync(ctx context.Context, c *container.Container, s project.Service) (bool, error) {
+	if c.ImageConfig() != s.Config().Image {
+		log.Printf("Images for %s do not match %s!=%s", c.Name(), c.ImageConfig(), s.Config().Image)
+		return true, nil
+	}
+
+	expectedHash := config.GetServiceHash(s.Name(), s.Config())
+	if c.Hash() != expectedHash {
+		log.Printf("Hashes for %s do not match %s!=%s", c.Name(), c.Hash(), expectedHash)
+		return true, nil
+	}
+
+	cli, _ := composeclient.Create(composeclient.Options{})
+
+	image, err := image.InspectImage(ctx, cli, c.ImageConfig())
+	if err != nil {
+		if client.IsErrImageNotFound(err) {
+			log.Printf("Image %s do not exist, do not know if it's out of sync", c.Image())
+			return false, nil
+		}
+		return false, err
+	}
+
+	log.Printf("Checking existing image name vs id: %s == %s", image.ID, c.Image())
+	return image.ID != c.Image(), err
+}
+
 // Save save the services descriptor file
 func Save() {
 
@@ -127,14 +225,14 @@ func (service *Service) writeCompose(compose string) error {
 	return ioutil.WriteFile(workdir+"/services/"+service.Name+"/docker-compose.yml", []byte(compose), 0644)
 }
 
-func getProject(service string) (project.APIProject, error) {
-	project, err := docker.NewProject(&ctx.Context{
+func getProject(service string) (project.Project, error) {
+	p, err := NewProject(&ctx.Context{
 		Context: project.Context{
 			ComposeFiles: []string{workdir + "/services/" + service + "/docker-compose.yml"},
 			ProjectName:  service,
 		},
 	}, nil)
-	return project, err
+	return *p, err
 }
 
 func (service *Service) info() (project.InfoSet, error) {
@@ -195,6 +293,16 @@ func (service *Service) down() error {
 	}
 
 	return project.Down(context.Background(), options.Down{})
+}
+
+func (service *Service) pull() error {
+
+	project, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
+
+	return project.Pull(context.Background())
 }
 
 func (service *Service) updateCompose() error {

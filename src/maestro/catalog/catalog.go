@@ -11,13 +11,12 @@ import (
 	"os"
 
 	"gopkg.in/yaml.v2"
-
 )
 
 // Catalog define the catalog
 type Catalog struct {
 	Workdir string
-	Apps map[string]App `yaml:"services"`
+	Apps    map[string]App `yaml:"services"`
 }
 
 // Service define a service provided by the catalogs
@@ -38,10 +37,7 @@ func Load(workdir string) {
 	yaml.Unmarshal(content, &c)
 
 	c.Workdir = workdir
-
-	log.Print(c)
 }
-
 
 // List return Services provided by the catalog
 func List(writer http.ResponseWriter, request *http.Request) {
@@ -55,7 +51,7 @@ func List(writer http.ResponseWriter, request *http.Request) {
 }
 
 func ComposeFile(name string) (string, error) {
-        c, err := ioutil.ReadFile(c.Workdir + "/catalog/" + name + "/docker-compose.yml")
+	c, err := ioutil.ReadFile(c.Workdir + "/catalog/" + name + "/docker-compose.yml")
 	return string(c), err
 }
 
