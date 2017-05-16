@@ -4,6 +4,8 @@ services:
   traefik:
     image: emilevauge/traefik
     container_name: traefik_test
+    networks:
+      - traefik
     ports:
       - 81:80
       - 444:443
@@ -29,3 +31,8 @@ services:
 volumes:
   acme:
     driver: local
+
+networks:
+  traefik:
+    external:
+      name: maestro_traefik

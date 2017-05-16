@@ -1,4 +1,8 @@
 services:
+  maestro:
+    display_name: maestro
+    required: true
+
   traefik:
     display_name: Traefik
     required: true

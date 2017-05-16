@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+
+  maestro:
+    image: no-cloud.fr/maestro:latest
+    container_name: maestro
+    restart: always
+    working_dir: /
+    networks:
+      - ldap
+      - traefik
+    environment:
+      - LDAP_HOST=ldap
+      - LDAP_PORT=389
+    labels:
+      - traefik.port=8888
+      - traefik.frontend.rule=Host:maestro.no-cloud.fr
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.entryPoints=http,https
+      - traefik.docker.network=traefik_default
+
+volumes:
+  maestro:
+    external: true
+
+networks:
+  ldap:
+    driver: bridge
+  traefik:
+    driver: bridge
