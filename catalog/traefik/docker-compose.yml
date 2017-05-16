@@ -6,7 +6,7 @@ services:
     container_name: traefik_test
     ports:
       - 81:80
-      - 543:443
+      - 444:443
     command:
       - --web=false
       - --docker
@@ -14,8 +14,8 @@ services:
       - --acme=true
       - --acme.storage=/etc/traefik/acme/acme.json
       - --acme.entrypoint=https
-      - --acme.email=${ADMIN_MAIL}
-      - --acme.domains=${DOMAINS}
+      - --acme.email={{ADMIN_MAIL}}
+      - --acme.domains={{DOMAINS}}
       - --acme.ondemand=true
       - --entryPoints=Name:https Address::443 TLS
       - --entryPoints=Name:http Address::80 Redirect.EntryPoint:https

@@ -19,11 +19,17 @@ type Catalog struct {
 	Apps    map[string]App `yaml:"services"`
 }
 
-// Service define a service provided by the catalogs
+// App define an app provided by the catalogs
 type App struct {
-	DisplayName string `yaml:"display_name"`
-	Required    bool   `yaml:"required"`
-	//Params []Param
+	DisplayName string           `yaml:"display_name"`
+	Required    bool             `yaml:"required"`
+	Params      map[string]Param `yaml:"params"`
+}
+
+// Param define a parameter of an app
+type Param struct {
+	Required bool   `yaml:"required"`
+	Default  string `yaml:"default"`
 }
 
 var c Catalog
@@ -37,6 +43,35 @@ func Load(workdir string) {
 	yaml.Unmarshal(content, &c)
 
 	c.Workdir = workdir
+	log.Println(c)
+}
+
+func GetRequiredApps() []string {
+
+	var requiredApps []string
+
+	for name, app := range c.Apps {
+		if app.Required {
+			requiredApps = append(requiredApps, name)
+		}
+	}
+
+	return requiredApps
+}
+
+func GetServiceParam(service string, param string) (string, bool) {
+
+	if s, f := c.Apps[service]; f {
+		if p, f := s.Params[param]; f {
+			if p.Required && p.Default == "" {
+				return "", false
+			}
+			return p.Default, true
+		}
+	}
+
+	log.Println("Pas trouvé le param")
+	return "", false
 }
 
 // List return Services provided by the catalog

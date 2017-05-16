@@ -2,10 +2,15 @@ services:
   traefik:
     display_name: Traefik
     required: true
+    params:
+      ADMIN_MAIL:
+        required: false
+      DOMAINS:
+        required: false
 
   ldap:
     display_name: Ldap
     required: true
 
   kresus:
-    display_name: Kresus  
+    display_name: Kresus

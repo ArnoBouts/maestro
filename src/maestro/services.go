@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -66,6 +68,22 @@ func Load() {
 			service.start()
 		}
 		log.Println(service)
+	}
+}
+
+// InstallRequired install required services
+func InstallRequired() {
+
+	log.Println("Install required services")
+
+	for _, name := range catalog.GetRequiredApps() {
+
+		if _, contains := m.Services[name]; !contains {
+			err := add(name, make(map[string](string)))
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
 	}
 }
 
@@ -215,14 +233,41 @@ func add(name string, params map[string](string)) error {
 
 func (service *Service) writeCompose(compose string) error {
 
-	for k, v := range service.Params {
-		compose = strings.Replace(compose, "{{"+k+"}}", v, -1)
+	r := regexp.MustCompile(`{{([^}]*)}}`)
+
+	params := r.FindAllStringSubmatch(compose, -1)
+
+	for _, param := range params {
+
+		// Search for param value
+		val, err := service.getParamValue(param[1])
+		if err != nil {
+			return err
+		}
+
+		compose = strings.Replace(compose, param[0], val, -1)
 	}
 
 	if err := os.Mkdir(workdir+"/services/"+service.Name, 0777); err != nil {
 		return err
 	}
 	return ioutil.WriteFile(workdir+"/services/"+service.Name+"/docker-compose.yml", []byte(compose), 0644)
+}
+
+func (service *Service) getParamValue(param string) (string, error) {
+
+	if val, founded := service.Params[param]; founded {
+		return val, nil
+	}
+	if val, founded := os.LookupEnv(param); founded {
+		return val, nil
+	}
+	if val, founded := catalog.GetServiceParam(service.Name, param); founded {
+		return val, nil
+	}
+
+	// If not value found and param required, return an error
+	return "", fmt.Errorf("Undefined required param value for '%s'", param)
 }
 
 func getProject(service string) (project.Project, error) {

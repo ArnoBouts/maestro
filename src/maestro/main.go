@@ -22,6 +22,8 @@ func main() {
 
 	Load()
 
+	InstallRequired()
+
 	CheckImageToUpdate()
 
 	CheckComposeUpdates()
