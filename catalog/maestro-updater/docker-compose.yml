@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+
+  maestro-updater:
+    image: no-cloud.fr/maestro:latest
+    container_name: maestro-updater
+    working_dir: /
+    command:
+      - -restart
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - maestro:/maestro/services
+
+volumes:
+  maestro:
+    external: true

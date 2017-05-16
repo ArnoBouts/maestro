@@ -462,13 +462,13 @@ func UpdateService(writer http.ResponseWriter, request *http.Request) {
 		}
 	} else {
 
-		project, err := getProject(service.Name)
-		if err != nil {
-			http.Error(writer, err.Error(), 500)
-			return
+		s, founded := m.Services[updater]
+		if !founded {
+			add(updater, make(map[string](string)))
+		} else {
+			s.pull()
+			s.up()
 		}
-
-		project.Run(context.Background(), "maestro", []string{"-restart"}, options.Run{})
 	}
 
 }

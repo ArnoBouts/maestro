@@ -1,7 +1,7 @@
 services:
   maestro:
     display_name: maestro
-    updater: maestro
+    updater: maestro-updater
     required: true
 
   traefik:
