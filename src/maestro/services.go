@@ -441,3 +441,20 @@ func AddService(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 }
+
+// UpdateService Resource that update the provided service
+func UpdateService(writer http.ResponseWriter, request *http.Request) {
+
+	var service Service
+	service.Name = mux.Vars(request)["service"]
+
+	if err := service.pull(); err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+
+	if err := service.up(); err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+}

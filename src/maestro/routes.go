@@ -23,6 +23,7 @@ var routes = Routes{
 	Route{"Catalog", "PATCH", "/services/{service}/stop", StopService},
 	Route{"Catalog", "PATCH", "/services/{service}/up", UpService},
 	Route{"Catalog", "PATCH", "/services/{service}/down", DownService},
+	Route{"Catalog", "PATCH", "/services/{service}/update", UpdateService},
 
 	Route{"Persons", "GET", "/persons", ldap.Persons},
 	Route{"Persons", "POST", "/persons", ldap.AddPerson},
