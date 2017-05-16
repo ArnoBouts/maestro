@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"maestro/catalog"
 	"net/http"
@@ -12,6 +14,10 @@ var workdir string
 
 func main() {
 
+	fmt.Println(os.Args)
+
+	restart := flag.Bool("restart", false, "maestro app must be restarted")
+
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -19,6 +25,11 @@ func main() {
 	workdir = path.Dir(ex)
 
 	catalog.Load(workdir)
+
+	if *restart {
+		Restart()
+		return
+	}
 
 	Load()
 

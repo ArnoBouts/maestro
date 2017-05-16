@@ -453,8 +453,29 @@ func UpdateService(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err := service.up(); err != nil {
-		http.Error(writer, err.Error(), 500)
-		return
+	updater := catalog.GetUpdater(service.Name)
+
+	if updater == "" {
+		if err := service.up(); err != nil {
+			http.Error(writer, err.Error(), 500)
+			return
+		}
+	} else {
+
+		project, err := getProject(service.Name)
+		if err != nil {
+			http.Error(writer, err.Error(), 500)
+			return
+		}
+
+		project.Run(context.Background(), "maestro", []string{"-restart"}, options.Run{})
 	}
+
+}
+
+func Restart() {
+	var service Service
+	service.Name = "maestro"
+
+	service.up()
 }

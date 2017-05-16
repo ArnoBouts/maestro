@@ -22,6 +22,7 @@ type Catalog struct {
 // App define an app provided by the catalogs
 type App struct {
 	DisplayName string           `yaml:"display_name"`
+	Updater     string           `yaml:"updater"`
 	Required    bool             `yaml:"required"`
 	Params      map[string]Param `yaml:"params"`
 }
@@ -72,6 +73,10 @@ func GetServiceParam(service string, param string) (string, bool) {
 
 	log.Println("Pas trouvé le param")
 	return "", false
+}
+
+func GetUpdater(service string) string {
+	return c.Apps[service].Updater
 }
 
 // List return Services provided by the catalog
