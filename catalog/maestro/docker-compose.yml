@@ -21,7 +21,7 @@ services:
       - traefik.frontend.rule=Host:maestro.no-cloud.fr
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
-      - traefik.docker.network=traefik_default
+      - traefik.docker.network=maestro_traefik
 
 volumes:
   maestro:
