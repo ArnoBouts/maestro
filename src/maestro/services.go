@@ -15,7 +15,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/docker/docker/client"
-	"github.com/docker/libcompose/config"
 	composeclient "github.com/docker/libcompose/docker/client"
 	"github.com/docker/libcompose/docker/container"
 	"github.com/docker/libcompose/docker/ctx"
@@ -129,11 +128,10 @@ func (service *Service) checkImageToUpdate() error {
 	}
 
 	for _, name := range p.ServiceConfigs.Keys() {
-		service, _ := p.CreateService(name)
-		containers, _ := collectContainers(context.Background(), p, service)
+		containers, _ := collectContainers(context.Background(), p, name)
 
 		for _, c := range containers {
-			outOfSync, err := outOfSync(context.Background(), c, service)
+			outOfSync, err := outOfSync(context.Background(), c, p, name)
 			if err != nil {
 				return err
 			}
@@ -147,9 +145,9 @@ func (service *Service) checkImageToUpdate() error {
 	return nil
 }
 
-func collectContainers(ctx context.Context, p project.Project, s project.Service) ([]*container.Container, error) {
+func collectContainers(ctx context.Context, p project.Project, service string) ([]*container.Container, error) {
 	client, _ := composeclient.Create(composeclient.Options{})
-	containers, err := container.ListByFilter(ctx, client, labels.SERVICE.Eq(s.Name()), labels.PROJECT.Eq(p.Name))
+	containers, err := container.ListByFilter(ctx, client, labels.SERVICE.Eq(service), labels.PROJECT.Eq(p.Name))
 	if err != nil {
 		return nil, err
 	}
@@ -167,17 +165,25 @@ func collectContainers(ctx context.Context, p project.Project, s project.Service
 	return result, nil
 }
 
-func outOfSync(ctx context.Context, c *container.Container, s project.Service) (bool, error) {
-	if c.ImageConfig() != s.Config().Image {
-		log.Printf("Images for %s do not match %s!=%s", c.Name(), c.ImageConfig(), s.Config().Image)
+func outOfSync(ctx context.Context, c *container.Container, p project.Project, service string) (bool, error) {
+
+	conf, ok := p.GetServiceConfig(service)
+	if !ok {
+		return false, fmt.Errorf("Failed to find service: %s", service)
+	}
+
+	if c.ImageConfig() != conf.Image {
+		log.Printf("Images for %s do not match %s!=%s", c.Name(), c.ImageConfig(), conf.Image)
 		return true, nil
 	}
 
-	expectedHash := config.GetServiceHash(s.Name(), s.Config())
-	if c.Hash() != expectedHash {
-		log.Printf("Hashes for %s do not match %s!=%s", c.Name(), c.Hash(), expectedHash)
-		return true, nil
-	}
+	// TODO : issue when trying to check service hash. conf pb ?
+	//
+	//expectedHash := config.GetServiceHash(service, conf)
+	//if c.Hash() != expectedHash {
+	//	log.Printf("Hashes for %s do not match %s!=%s", c.Name(), c.Hash(), expectedHash)
+	//	return true, nil
+	//}
 
 	cli, _ := composeclient.Create(composeclient.Options{})
 
