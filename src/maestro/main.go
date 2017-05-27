@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/jasonlvhit/gocron"
 )
 
 var workdir string
@@ -37,9 +39,11 @@ func main() {
 
 	InstallRequired()
 
-	CheckImageToUpdate()
-
 	CheckComposeUpdates()
+
+	gocron.Every(1).Minute().Do(UpdateServices)
+
+	<-gocron.Start()
 
 	router := NewRouter()
 

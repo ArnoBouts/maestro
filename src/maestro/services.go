@@ -104,9 +104,9 @@ func CheckComposeUpdates() {
 func PullServices() {
 
 	for _, service := range m.Services {
-		if service.Enable {
-			service.pull()
-		}
+		//if service.Enable {
+		service.pull()
+		//}
 	}
 }
 
@@ -448,35 +448,38 @@ func AddService(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func (service *Service) update() error {
+	if err := service.pull(); err != nil {
+		return err
+	}
+
+	updater := catalog.GetUpdater(service.Name)
+
+	if updater == "" {
+		return service.up()
+
+	} else {
+		s, founded := m.Services[updater]
+		if !founded {
+			return add(updater, make(map[string](string)))
+		} else {
+			if err := s.pull(); err != nil {
+				return err
+			}
+			return s.up()
+		}
+	}
+}
+
 // UpdateService Resource that update the provided service
 func UpdateService(writer http.ResponseWriter, request *http.Request) {
 
 	var service Service
 	service.Name = mux.Vars(request)["service"]
 
-	if err := service.pull(); err != nil {
+	if err := service.update(); err != nil {
 		http.Error(writer, err.Error(), 500)
-		return
 	}
-
-	updater := catalog.GetUpdater(service.Name)
-
-	if updater == "" {
-		if err := service.up(); err != nil {
-			http.Error(writer, err.Error(), 500)
-			return
-		}
-	} else {
-
-		s, founded := m.Services[updater]
-		if !founded {
-			add(updater, make(map[string](string)))
-		} else {
-			s.pull()
-			s.up()
-		}
-	}
-
 }
 
 func Restart() {
@@ -484,4 +487,13 @@ func Restart() {
 	service.Name = "maestro"
 
 	service.up()
+}
+
+func UpdateServices() {
+
+	log.Println("Starting update task")
+
+	PullServices()
+
+	CheckImageToUpdate()
 }
