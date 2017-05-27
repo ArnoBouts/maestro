@@ -3,7 +3,7 @@ version: '2'
 services:
 
   prosody-db:
-    image: maryadb:10
+    image: mariadb:10
     container_name: prosody-db
     networks:
       - prosody
