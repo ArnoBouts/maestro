@@ -115,12 +115,16 @@ func CheckImageToUpdate() {
 	for _, service := range m.Services {
 		//if service.Enable {
 
-		service.checkImageToUpdate()
+		if err := service.checkImageToUpdate(); err != nil {
+			log.Printf("Unable to uptade service %s : %s", service.Name, err.Error())
+		}
 		//}
 	}
 }
 
 func (service *Service) checkImageToUpdate() error {
+
+	uptodate := true
 
 	p, err := getProject(service.Name)
 	if err != nil {
@@ -138,7 +142,14 @@ func (service *Service) checkImageToUpdate() error {
 
 			if outOfSync {
 				log.Printf("%s is out of sync", name)
+				uptodate = false
 			}
+		}
+	}
+
+	if !uptodate {
+		if err := service.update(); err != nil {
+			return err
 		}
 	}
 
