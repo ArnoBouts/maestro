@@ -19,3 +19,9 @@ services:
 
   kresus:
     display_name: Kresus
+
+  prosody:
+    display_name: Prosody
+    params:
+      DOMAIN:
+        required: true

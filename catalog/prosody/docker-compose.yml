@@ -1,0 +1,68 @@
+version: '2'
+
+services:
+
+  prosody-db:
+    image: maryadb:10
+    container_name: prosody-db
+    networks:
+      - prosody
+    environment:
+      - MYSQL_USER=prosody
+      - MYSQL_PASSWORD=prosody
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - prosody-data:/var/lib/postgresql/data
+
+  prosody:
+    image: no-cloud.fr/maestro/prosody
+    container_name: prosody
+    networks:
+      prosody:
+        aliases:
+          - prosody.components
+      ldap:
+        aliases:
+          - prosody.ldap
+      traefik:
+        aliases:
+          - prosody.traefik
+    ports:
+      - "5222:5222"
+      - "5269:5269"
+      - "5281:5281"
+    environment:
+      - DOMAIN={{MAESTRO_DOMAIN}}
+    labels:
+      - traefik.port=5280
+      - traefik.frontend.entryPoints=http,https
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.rule=Host:xmpp.{{MAESTRO_DOMAIN}}
+      - traefik.docker.network=maestro_traefik
+    links:
+      - prosody-db
+
+  spectrum:
+    image: no-cloud.fr/maestro/spectrum
+    container_name: spectrum
+    networks:
+      - prosody
+    volumes:
+      - prosody-data:/var/lib/spectrum2
+    links:
+      - prosody
+      - prosody-db
+
+volumes:
+  prosody-data:
+    driver: local
+
+networks:
+  prosody:
+    driver: bridge
+  ldap:
+    external:
+      name: maestro_ldap
+  traefik:
+    external:
+      name: maestro_traefik
