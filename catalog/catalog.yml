@@ -3,6 +3,9 @@ services:
     display_name: maestro
     updater: maestro-updater
     required: true
+    params:
+      MAESTRO_DOMAIN:
+        required: true
 
   traefik:
     display_name: Traefik

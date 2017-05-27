@@ -16,6 +16,7 @@ services:
     environment:
       - LDAP_HOST=ldap
       - LDAP_PORT=389
+      - MAESTRO_DOMAIN={{MAESTRO_DOMAIN}}
     labels:
       - traefik.port=8888
       - traefik.frontend.rule=Host:maestro.no-cloud.fr
