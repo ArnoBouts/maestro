@@ -41,11 +41,15 @@ func main() {
 
 	CheckComposeUpdates()
 
-	gocron.Every(1).Minute().Do(UpdateServices)
-
-	<-gocron.Start()
+	go update()
 
 	router := NewRouter()
 
 	log.Fatal(http.ListenAndServe(":8888", router))
+}
+
+func update() {
+	gocron.Every(1).Minute().Do(UpdateServices)
+
+	<-gocron.Start()
 }
