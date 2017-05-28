@@ -30,7 +30,5 @@ pipeline:
 
   notif:
     image: no-cloud.fr/drone/xmpp
-    jid: ${XMPP_JID}
-    password: ${XMPP_PASSWORD}
-    to_jid: ${XMPP_TO}
+    secrets: [ xmpp_jid, xmpp_password, xmpp_to_jid ]
 
