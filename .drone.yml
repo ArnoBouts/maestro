@@ -28,7 +28,7 @@ pipeline:
     tag: latest
     file: Dockerfile
 
-  notify:
+  notif:
     image: no-cloud.fr/drone/xmpp
     jid: ${XMPP_JID}
     password: ${XMPP_PASSWORD}
