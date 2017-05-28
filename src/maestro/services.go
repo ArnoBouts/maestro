@@ -91,12 +91,12 @@ func CheckComposeUpdates() {
 
 	// for all enabled services, check with sha256 if compose was updated in the catalog
 	for name, service := range m.Services {
-		if service.Enable {
-			sha, _ := catalog.ComposeSha256(name)
-			if service.Checksum != sha {
-				log.Println(name + " compose file need to be updated")
-			}
+		//if service.Enable {
+		sha, _ := catalog.ComposeSha256(name)
+		if service.Checksum != sha {
+			log.Println(name + " compose file need to be updated")
 		}
+		//}
 	}
 }
 
@@ -225,6 +225,12 @@ func add(name string, params map[string](string)) error {
 	var service Service
 	service.Name = name
 	service.Params = params
+
+	sha, err := catalog.ComposeSha256(name)
+	service.Checksum = sha
+	if err != nil {
+		return err
+	}
 
 	compose, err := catalog.ComposeFile(service.Name)
 	if err != nil {
