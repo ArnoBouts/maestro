@@ -27,3 +27,10 @@ pipeline:
     repo: no-cloud.fr/maestro
     tag: latest
     file: Dockerfile
+
+  notify:
+    image: no-cloud.fr/drone/xmpp
+    jid: ${XMPP_JID}
+    password: ${XMPP_PASSWORD}
+    to_jid: ${XMPP_TO}
+
