@@ -33,6 +33,8 @@ services:
       - "5281:5281"
     environment:
       - DOMAIN={{MAESTRO_DOMAIN}}
+      - LDAP_ADMIN_DN={{LDAP_ADMIN_DN}}
+      - LDAP_ADMIN_PASSWORD={{LDAP_ADMIN_PASSWORD}}
     labels:
       - traefik.port=5280
       - traefik.frontend.entryPoints=http,https
