@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+
+  jsxc:
+    image: no-cloud.fr/maestro/jsxc
+    container_name: jsxc
+    networks:
+      - traefik
+    env:
+      - XMPP_DOMAIN={{MAESTRO_DOMAIN}}
+      - XMPP_HOST=xmpp.{{MAESTRO_DOMAIN}}
+    labels:
+      - traefik.port=80
+      - traefik.frontend.rule=Host:jsxc.{{MAESTRO_DOMAIN}}
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.entryPoints=http,https
+
+networks:
+  traefik:
+    external:
+      name: maestro_traefik
