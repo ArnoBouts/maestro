@@ -19,7 +19,7 @@ services:
       - MAESTRO_DOMAIN={{MAESTRO_DOMAIN}}
     labels:
       - traefik.port=8888
-      - traefik.frontend.rule=Host:maestro.no-cloud.fr
+      - traefik.frontend.rule=Host:maestro.{{MAESTRO_DOMAIN}}
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
       - traefik.docker.network=maestro_traefik
