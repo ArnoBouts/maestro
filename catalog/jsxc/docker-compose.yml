@@ -7,7 +7,7 @@ services:
     container_name: jsxc
     networks:
       - traefik
-    env:
+    environment:
       - XMPP_DOMAIN={{MAESTRO_DOMAIN}}
       - XMPP_HOST=xmpp.{{MAESTRO_DOMAIN}}
     labels:
