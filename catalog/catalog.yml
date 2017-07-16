@@ -6,6 +6,8 @@ services:
     params:
       MAESTRO_DOMAIN:
         required: true
+      LDAP_ADMIN_PASSWORD:
+        required: true
 
   traefik:
     display_name: Traefik

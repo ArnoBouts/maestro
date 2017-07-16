@@ -16,6 +16,8 @@ services:
     environment:
       - LDAP_HOST=ldap
       - LDAP_PORT=389
+      - LDAP_ADMIN_DN=cn=admin,dc=home
+      - LDAP_ADMIN_PASSWORD={{LDAP_ADMIN_PASSWORD}}
       - MAESTRO_DOMAIN={{MAESTRO_DOMAIN}}
     labels:
       - traefik.port=8888
