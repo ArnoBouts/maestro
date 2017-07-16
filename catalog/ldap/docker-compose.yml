@@ -3,7 +3,7 @@ version: '2'
 services:
 
   ldap:
-    image: osixia/openldap
+    image: no-cloud.fr/maestro/openldap
     container_name: ldap_test
     networks:
       - ldap
