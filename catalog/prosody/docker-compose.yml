@@ -8,6 +8,7 @@ services:
     networks:
       - prosody
     environment:
+      - MYSQL_DATABASE=prosody
       - MYSQL_USER=prosody
       - MYSQL_PASSWORD=prosody
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
