@@ -60,6 +60,15 @@ func GetRequiredApps() []string {
 	return requiredApps
 }
 
+func GetServiceParams(service string) (map[string]Param) {
+
+	if s, f := c.Apps[service]; f {
+		return s.Params
+	}
+
+	return nil
+}
+
 func GetServiceParam(service string, param string) (string, bool) {
 
 	if s, f := c.Apps[service]; f {

@@ -224,7 +224,11 @@ func add(name string, params map[string](string)) error {
 	// create service
 	var service Service
 	service.Name = name
-	service.Params = params
+	p, err := service.computeParams(params)
+	if err != nil {
+		return err
+	}
+	service.Params = p
 
 	sha, err := catalog.ComposeSha256(name)
 	service.Checksum = sha
@@ -252,6 +256,24 @@ func add(name string, params map[string](string)) error {
 
 	// up compose
 	return service.up()
+}
+
+func (service *Service) computeParams(params map[string](string)) (map[string](string), error) {
+	result := make(map[string](string))
+
+	catalogParams := catalog.GetServiceParams(service.Name)
+
+	if(catalogParams != nil) {
+		for p, _ := range catalogParams {
+			v, err := service.getParamValue(p)
+			if err != nil {
+				return nil, err
+			}
+			result[p] = v
+		}
+	}
+
+	return result, nil
 }
 
 func (service *Service) writeCompose(compose string) error {
