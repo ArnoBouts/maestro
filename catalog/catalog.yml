@@ -27,9 +27,6 @@ services:
 
   prosody:
     display_name: Prosody
-    params:
-      DOMAIN:
-        required: true
 
   jsxc:
     display_name: Jsxc
