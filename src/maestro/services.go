@@ -272,7 +272,7 @@ func add(name string, params map[string](string)) error {
 
 func (service *Service) configure() error {
 
-	sha, err := catalog.ComposeSha256(name)
+	sha, err := catalog.ComposeSha256(service.Name)
 	service.Checksum = sha
 	if err != nil {
 		return err
