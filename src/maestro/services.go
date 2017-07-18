@@ -96,16 +96,17 @@ func CheckComposeUpdates() {
 			log.Println(name + " compose file need to be updated")
 			err := service.down()
 			if err != nil {
-				log.Printf("Enable to down service %s : %s", servixe.Name, err.Error())
+				log.Printf("Enable to down service %s : %s", service.Name, err.Error())
 				continue
 			}
 
 			//override compose file
-			p, err := service.computeParams(servixe.Params)
+			p, err := service.computeParams(service.Params)
 			if err != nil {
 				log.Printf("Enable to compute params for the service %s : %s", service.Name, err.Error())
 				continue
 			}
+			service.Params = p
 
 			err = service.configure()
 			if err != nil {
