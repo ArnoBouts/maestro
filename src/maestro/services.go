@@ -66,7 +66,6 @@ func Load() {
 		if service.Enable {
 			service.start()
 		}
-		log.Println(service)
 	}
 }
 
@@ -207,7 +206,6 @@ func outOfSync(ctx context.Context, c *container.Container, p project.Project, s
 		return false, err
 	}
 
-	log.Printf("Checking existing image name vs id: %s == %s", image.ID, c.Image())
 	return image.ID != c.Image(), err
 }
 
@@ -529,8 +527,6 @@ func Restart() {
 }
 
 func UpdateServices() {
-
-	log.Println("Starting update task")
 
 	PullServices()
 
