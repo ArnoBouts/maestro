@@ -44,7 +44,6 @@ func Load(workdir string) {
 	yaml.Unmarshal(content, &c)
 
 	c.Workdir = workdir
-	log.Println(c)
 }
 
 func GetRequiredApps() []string {
@@ -80,7 +79,6 @@ func GetServiceParam(service string, param string) (string, bool) {
 		}
 	}
 
-	log.Println("Pas trouvé le param")
 	return "", false
 }
 
