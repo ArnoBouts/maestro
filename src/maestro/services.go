@@ -94,6 +94,32 @@ func CheckComposeUpdates() {
 		sha, _ := catalog.ComposeSha256(name)
 		if service.Checksum != sha {
 			log.Println(name + " compose file need to be updated")
+			err := service.down()
+			if err != nil {
+				log.Printf("Enable to down service %s : %s", servixe.Name, err.Error())
+				continue
+			}
+
+			//override compose file
+			p, err := service.computeParams(servixe.Params)
+			if err != nil {
+				log.Printf("Enable to compute params for the service %s : %s", service.Name, err.Error())
+				continue
+			}
+
+			err = service.configure()
+			if err != nil {
+				log.Printf("Enable to configure service %s : %s", service.Name, err.Error())
+				continue
+			}
+
+			err = service.up()
+			if err != nil {
+				log.Printf("Enable to up service %s : %s", service.Name, err.Error())
+				continue
+			}
+			
+			log.Println(name + " compose file updated")
 		}
 		//}
 	}
@@ -228,6 +254,24 @@ func add(name string, params map[string](string)) error {
 	}
 	service.Params = p
 
+	err = service.configure()
+	if err != nil {
+		return err
+	}
+
+	// add service to maestro
+	if m.Services == nil {
+		m.Services = make(map[string](*Service))
+	}
+	m.Services[name] = &service
+	Save()
+
+	// up compose
+	return service.up()
+}
+
+func (service *Service) configure() error {
+
 	sha, err := catalog.ComposeSha256(name)
 	service.Checksum = sha
 	if err != nil {
@@ -245,15 +289,7 @@ func add(name string, params map[string](string)) error {
 		return err
 	}
 
-	// add service to maestro
-	if m.Services == nil {
-		m.Services = make(map[string](*Service))
-	}
-	m.Services[name] = &service
-	Save()
-
-	// up compose
-	return service.up()
+	return nil
 }
 
 func (service *Service) computeParams(params map[string](string)) (map[string](string), error) {
