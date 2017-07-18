@@ -50,6 +50,8 @@ services:
     container_name: spectrum
     networks:
       - prosody
+    environment:
+      - DOMAIN={{MAESTRO_DOMAIN}}
     volumes:
       - prosody-data:/var/lib/spectrum2
     links:
