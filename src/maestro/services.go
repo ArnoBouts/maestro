@@ -328,7 +328,7 @@ func (service *Service) writeCompose(compose string) error {
 		compose = strings.Replace(compose, param[0], val, -1)
 	}
 
-	if err := os.Mkdir(workdir+"/services/"+service.Name, 0777); err != nil {
+	if err := os.MkdirAll(workdir+"/services/"+service.Name, 0777); err != nil {
 		return err
 	}
 	return ioutil.WriteFile(workdir+"/services/"+service.Name+"/docker-compose.yml", []byte(compose), 0644)
