@@ -90,39 +90,39 @@ func CheckComposeUpdates() {
 
 	// for all enabled services, check with sha256 if compose was updated in the catalog
 	for name, service := range m.Services {
-		//if service.Enable {
-		sha, _ := catalog.ComposeSha256(name)
-		if service.Checksum != sha {
-			log.Println(name + " compose file need to be updated")
-			err := service.down()
-			if err != nil {
-				log.Printf("Enable to down service %s : %s", service.Name, err.Error())
-				continue
-			}
+		if service.Enable {
+			sha, _ := catalog.ComposeSha256(name)
+			if service.Checksum != sha {
+				log.Println(name + " compose file need to be updated")
+				err := service.down()
+				if err != nil {
+					log.Printf("Enable to down service %s : %s", service.Name, err.Error())
+					continue
+				}
 
-			//override compose file
-			p, err := service.computeParams(service.Params)
-			if err != nil {
-				log.Printf("Enable to compute params for the service %s : %s", service.Name, err.Error())
-				continue
-			}
-			service.Params = p
+				//override compose file
+				p, err := service.computeParams(service.Params)
+				if err != nil {
+					log.Printf("Enable to compute params for the service %s : %s", service.Name, err.Error())
+					continue
+				}
+				service.Params = p
 
-			err = service.configure()
-			if err != nil {
-				log.Printf("Enable to configure service %s : %s", service.Name, err.Error())
-				continue
-			}
+				err = service.configure()
+				if err != nil {
+					log.Printf("Enable to configure service %s : %s", service.Name, err.Error())
+					continue
+				}
 
-			err = service.up()
-			if err != nil {
-				log.Printf("Enable to up service %s : %s", service.Name, err.Error())
-				continue
-			}
+				err = service.up()
+				if err != nil {
+					log.Printf("Enable to up service %s : %s", service.Name, err.Error())
+					continue
+				}
 			
-			log.Println(name + " compose file updated")
+				log.Println(name + " compose file updated")
+			}
 		}
-		//}
 	}
 }
 
@@ -130,21 +130,21 @@ func CheckComposeUpdates() {
 func PullServices() {
 
 	for _, service := range m.Services {
-		//if service.Enable {
-		service.pull()
-		//}
+		if service.Enable {
+			service.pull()
+		}
 	}
 }
 
 func CheckImageToUpdate() {
 
 	for _, service := range m.Services {
-		//if service.Enable {
+		if service.Enable {
 
-		if err := service.checkImageToUpdate(); err != nil {
-			log.Printf("Unable to uptade service %s : %s", service.Name, err.Error())
+			if err := service.checkImageToUpdate(); err != nil {
+				log.Printf("Unable to uptade service %s : %s", service.Name, err.Error())
+			}
 		}
-		//}
 	}
 }
 
@@ -268,7 +268,13 @@ func add(name string, params map[string](string)) error {
 	Save()
 
 	// up compose
-	return service.up()
+	err = service.up()
+	if err != nil {
+		return err
+	}
+	service.Enable = true
+	Save()
+	return nil
 }
 
 func (service *Service) configure() error {
