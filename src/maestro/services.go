@@ -378,17 +378,35 @@ func (service *Service) info() (project.InfoSet, error) {
 
 func (service *Service) start() error {
 
-	log.Printf("Start service '%s'\n", service.Name)
 
-	project, err := getProject(service.Name)
+	p, err := getProject(service.Name)
 	if err != nil {
 		return err
 	}
 
-	err = project.Start(context.Background())
+	servicesToUpdate := []string{}
+	for _, serviceName := range p.ServiceConfigs.Keys() {
+
+		cs, err := p.Containers(context.Background(), project.Filter{project.Stopped}, serviceName)
+		if err != nil {
+			return err
+		}
+		if len(cs) > 0 {
+			servicesToUpdate = append(servicesToUpdate, serviceName)
+			continue
+		}
+	}
+
+	if len(servicesToUpdate) == 0 {
+		return nil
+	}
+
+	log.Printf("Start service '%s'\n", service.Name)
+
+	err = p.Start(context.Background(), servicesToUpdate...)
 
 	if err != nil {
-		log.Printf("Service '%s' starting failed\n", service.Name)
+		log.Printf("Service '%s' starting failed : %s\n", service.Name, err.Error())
 	} else {
 		log.Printf("Service '%s' started\n", service.Name)
 	}
