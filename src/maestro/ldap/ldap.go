@@ -31,6 +31,11 @@ func Groups(writer http.ResponseWriter, request *http.Request) {
 	writer.Write(payload)
 }
 
+func AddGroup(groupName string) error {
+
+	return addGroup(Group{"cn=" + groupName + ",ou=groups,dc=home", groupName, nil})
+}
+
 func loadGroups() ([]Group, error) {
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
 	if err != nil {
@@ -63,3 +68,49 @@ func loadGroups() ([]Group, error) {
 
 	return res, nil
 }
+
+func addGroup(g Group) error {
+        l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
+        if err != nil {
+                return err
+        }
+        defer l.Close()
+
+        err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
+        if err != nil {
+                return err
+        }
+
+        req := ldap.NewAddRequest(g.Dn)
+        req.Attribute("objectClass", []string{"top", "groupOfNames"})
+        req.Attribute("cn", []string{g.Cn})
+
+        err = l.Add(req)
+        if err != nil {
+                return err
+        }
+
+        return nil
+}
+
+func deleteGroup(dn string) error {
+        l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
+        if err != nil {
+                return err
+        }
+        defer l.Close()
+
+        err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
+        if err != nil {
+                return err
+        }
+
+        req := ldap.NewDelRequest(dn, nil)
+        err = l.Del(req)
+        if err != nil {
+                return err
+        }
+
+        return nil
+}
+

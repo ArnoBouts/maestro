@@ -25,6 +25,7 @@ type App struct {
 	Updater     string           `yaml:"updater"`
 	Required    bool             `yaml:"required"`
 	Params      map[string]Param `yaml:"params"`
+	LdapGroup   string           `yaml:"ldap_group"`
 }
 
 // Param define a parameter of an app
@@ -84,6 +85,10 @@ func GetServiceParam(service string, param string) (string, bool) {
 
 func GetUpdater(service string) string {
 	return c.Apps[service].Updater
+}
+
+func GetLdapGroup(service string) string {
+        return c.Apps[service].LdapGroup
 }
 
 // List return Services provided by the catalog

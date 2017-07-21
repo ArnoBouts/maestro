@@ -26,6 +26,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"maestro/catalog"
+	"maestro/ldap"
 )
 
 type maestro struct {
@@ -266,6 +267,10 @@ func add(name string, params map[string](string)) error {
 	}
 	m.Services[name] = &service
 	Save()
+
+	if ldapGroup := catalog.GetLdapGroup(name); ldapGroup != "" {
+		ldap.AddGroup(ldapGroup)
+	}
 
 	// up compose
 	err = service.up()
