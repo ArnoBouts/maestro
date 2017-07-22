@@ -25,3 +25,8 @@ services:
 
   jsxc:
     display_name: Jsxc
+
+  nextcloud:
+    display_name: nextcloud
+    ldap_group: nextcloud
+
