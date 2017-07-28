@@ -35,4 +35,4 @@ services:
     ldap_group: mail
     install:
       - service: mail
-        command: [generate-dkim-config]
+        command: [maestro-generate-dkim-config]

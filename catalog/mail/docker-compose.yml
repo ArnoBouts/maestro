@@ -2,7 +2,7 @@ version: '2'
 
 services:
   mail:
-    image: tvial/docker-mailserver:latest
+    image: no-cloud.fr/maestro/mailserver:latest
     hostname: mail
     domainname: {{MAESTRO_DOMAIN}}
     container_name: mail
