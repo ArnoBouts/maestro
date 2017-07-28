@@ -27,6 +27,9 @@ services:
     display_name: Jsxc
 
   nextcloud:
-    display_name: nextcloud
+    display_name: Nextcloud
     ldap_group: nextcloud
 
+  mail:
+    display_name: Mail Server
+    ldap_group: mail

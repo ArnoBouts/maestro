@@ -1,0 +1,59 @@
+version: '2'
+
+services:
+  mail:
+    image: tvial/docker-mailserver:latest
+    hostname: mail
+    domainname: {{MAESTRO_DOMAIN}}
+    container_name: mail
+    ports:
+      - "25:25"
+      - "143:143"
+      - "587:587"
+      - "993:993"
+    networks:
+      - ldap
+    volumes:
+      - mail-data:/var/mail
+      - mail-state:/var/mail-state
+      - mail-config:/tmp/docker-mailserver/
+    environment:
+      - ENABLE_SPAMASSASSIN=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_FAIL2BAN=1
+      - ENABLE_POSTGREY=1
+      - ONE_DIR=1
+      - DMS_DEBUG=0
+      - ENABLE_LDAP=1
+      - LDAP_SERVER_HOST=ldap
+      - LDAP_SEARCH_BASE=ou=people,dc=home
+      - LDAP_BIND_DN=cn=admin,dc=home
+      - LDAP_BIND_PW={{LDAP_ADMIN_PASSWORD}}
+      - LDAP_QUERY_FILTER_USER="(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))"
+      - LDAP_QUERY_FILTER_GROUP="(&(mailGroupMember=%s))"
+      - LDAP_QUERY_FILTER_ALIAS="(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))"
+      - DOVECOT_PASS_FILTER="(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - DOVECOT_USER_FILTER="(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - ENABLE_SASLAUTHD=1
+      - SASLAUTHD_MECHANISMS=ldap
+      - SASLAUTHD_LDAP_SERVER=ldap
+      - SASLAUTHD_LDAP_BIND_DN=cn=admin,dc=home
+      - SASLAUTHD_LDAP_PASSWORD={{LDAP_ADMIN_PASSWORD}}
+      - SASLAUTHD_LDAP_SEARCH_BASE=ou=people,dc=home
+      - POSTMASTER_ADDRESS=postmaster@{{MAESTRO_DOMAIN}}
+    cap_add:
+      - NET_ADMIN
+
+volumes:
+  mail-data:
+    driver: local
+  mail-state:
+    driver: local
+  mail-config:
+    driver: local
+
+networks:
+  ldap:
+    external:
+      name: maestro_ldap
+
