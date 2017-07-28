@@ -120,7 +120,7 @@ func CheckComposeUpdates() {
 					log.Printf("Enable to up service %s : %s", service.Name, err.Error())
 					continue
 				}
-			
+
 				log.Println(name + " compose file updated")
 			}
 		}
@@ -247,6 +247,11 @@ func Save() {
 func add(name string, params map[string](string)) error {
 	log.Println("Install service '" + name + "'")
 
+	catalogApp := catalog.GetApp(name)
+	if catalogApp == nil {
+		return fmt.Errorf("No app '%s' found in the catalog", name)
+	}
+
 	// create service
 	var service Service
 	service.Name = name
@@ -272,6 +277,18 @@ func add(name string, params map[string](string)) error {
 		ldap.AddGroup(ldapGroup)
 	}
 
+	log.Println("Install :")
+	log.Println(catalogApp.Install)
+
+	if catalogApp.Install != nil {
+		for _, cmd := range catalogApp.Install {
+			err = service.run(cmd)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	// up compose
 	err = service.up()
 	if err != nil {
@@ -280,6 +297,16 @@ func add(name string, params map[string](string)) error {
 	service.Enable = true
 	Save()
 	return nil
+}
+
+func (service *Service) run(cmd catalog.Command) error {
+	project, err := getProject(service.Name)
+	if err != nil {
+		return err
+	}
+
+	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{})
+	return err
 }
 
 func (service *Service) configure() error {
@@ -309,8 +336,8 @@ func (service *Service) computeParams(params map[string](string)) (map[string](s
 
 	catalogParams := catalog.GetServiceParams(service.Name)
 
-	if(catalogParams != nil) {
-		for p, _ := range catalogParams {
+	if catalogParams != nil {
+		for p := range catalogParams {
 			v, err := service.getParamValue(p)
 			if err != nil {
 				return nil, err
@@ -382,7 +409,6 @@ func (service *Service) info() (project.InfoSet, error) {
 }
 
 func (service *Service) start() error {
-
 
 	p, err := getProject(service.Name)
 	if err != nil {
@@ -560,18 +586,17 @@ func (service *Service) update() error {
 
 	if updater == "" {
 		return service.up()
-
-	} else {
-		s, founded := m.Services[updater]
-		if !founded {
-			return add(updater, make(map[string](string)))
-		} else {
-			if err := s.pull(); err != nil {
-				return err
-			}
-			return s.up()
-		}
 	}
+
+	s, founded := m.Services[updater]
+	if !founded {
+		return add(updater, make(map[string](string)))
+	}
+
+	if err := s.pull(); err != nil {
+		return err
+	}
+	return s.up()
 }
 
 // UpdateService Resource that update the provided service

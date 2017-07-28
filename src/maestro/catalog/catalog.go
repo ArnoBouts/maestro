@@ -26,12 +26,19 @@ type App struct {
 	Required    bool             `yaml:"required"`
 	Params      map[string]Param `yaml:"params"`
 	LdapGroup   string           `yaml:"ldap_group"`
+	Install     []Command        `yaml:"install"`
 }
 
 // Param define a parameter of an app
 type Param struct {
 	Required bool   `yaml:"required"`
 	Default  string `yaml:"default"`
+}
+
+// Command define a docker run command
+type Command struct {
+	Service string   `yaml:"service"`
+	Command []string `yaml:"command"`
 }
 
 var c Catalog
@@ -60,7 +67,16 @@ func GetRequiredApps() []string {
 	return requiredApps
 }
 
-func GetServiceParams(service string) (map[string]Param) {
+func GetApp(name string) *App {
+
+	if a, f := c.Apps[name]; f {
+		return &a
+	}
+
+	return nil
+}
+
+func GetServiceParams(service string) map[string]Param {
 
 	if s, f := c.Apps[service]; f {
 		return s.Params
@@ -88,7 +104,7 @@ func GetUpdater(service string) string {
 }
 
 func GetLdapGroup(service string) string {
-        return c.Apps[service].LdapGroup
+	return c.Apps[service].LdapGroup
 }
 
 // List return Services provided by the catalog

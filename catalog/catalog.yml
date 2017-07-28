@@ -33,3 +33,6 @@ services:
   mail:
     display_name: Mail Server
     ldap_group: mail
+    install:
+      - service: mail
+        command: [generate-dkim-config]
