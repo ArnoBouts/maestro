@@ -274,7 +274,10 @@ func add(name string, params map[string](string)) error {
 	Save()
 
 	if ldapGroup := catalog.GetLdapGroup(name); ldapGroup != "" {
-		ldap.AddGroup(ldapGroup)
+		err = ldap.AddGroup(ldapGroup)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Println("Install :")
