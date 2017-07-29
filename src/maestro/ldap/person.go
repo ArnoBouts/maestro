@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+        "log"
 	"net/http"
 	"os"
 	"strconv"
@@ -225,6 +226,9 @@ func editPerson(dn string, p Person) error {
 }
 
 func grantService(dn string, serviceDn string, allow bool) error {
+
+	log.Printf("Grant service '%s' to user '%s' : %t", serviceDn, dn, allow)
+
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
 	if err != nil {
 		return err
