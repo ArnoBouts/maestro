@@ -84,6 +84,7 @@ func addGroup(g Group) error {
         req := ldap.NewAddRequest(g.Dn)
         req.Attribute("objectClass", []string{"top", "groupOfNames"})
         req.Attribute("cn", []string{g.Cn})
+        req.Attribute("member", []string{""})
 
         err = l.Add(req)
         if err != nil {
