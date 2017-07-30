@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-        "log"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -242,9 +242,9 @@ func grantService(dn string, serviceDn string, allow bool) error {
 
 	req := ldap.NewModifyRequest(serviceDn)
 	if allow {
-		req.Add("member", []string{dn})
+		req.Add("uniqueMember", []string{dn})
 	} else {
-		req.Delete("member", []string{dn})
+		req.Delete("uniqueMember", []string{dn})
 	}
 
 	err = l.Modify(req)

@@ -51,8 +51,8 @@ func loadGroups() ([]Group, error) {
 	searchRequest := ldap.NewSearchRequest(
 		"ou=groups,dc=home", // The base dn to search
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(&(objectClass=groupOfNames))", // The filter to apply
-		[]string{"dn", "cn", "member"},  // A list attributes to retrieve
+		"(&(objectClass=groupOfUniqueNames))", // The filter to apply
+		[]string{"dn", "cn", "uniqueMember"},  // A list attributes to retrieve
 		nil,
 	)
 
@@ -63,55 +63,54 @@ func loadGroups() ([]Group, error) {
 
 	res := make([]Group, len(sr.Entries))
 	for i, entry := range sr.Entries {
-		res[i] = Group{entry.DN, entry.GetAttributeValue("cn"), entry.GetAttributeValues("member")}
+		res[i] = Group{entry.DN, entry.GetAttributeValue("cn"), entry.GetAttributeValues("uniqueMember")}
 	}
 
 	return res, nil
 }
 
 func addGroup(g Group) error {
-        l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
-        if err != nil {
-                return err
-        }
-        defer l.Close()
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
+	if err != nil {
+		return err
+	}
+	defer l.Close()
 
-        err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
-        if err != nil {
-                return err
-        }
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
+	if err != nil {
+		return err
+	}
 
-        req := ldap.NewAddRequest(g.Dn)
-        req.Attribute("objectClass", []string{"top", "groupOfNames"})
-        req.Attribute("cn", []string{g.Cn})
-        req.Attribute("member", []string{""})
+	req := ldap.NewAddRequest(g.Dn)
+	req.Attribute("objectClass", []string{"top", "groupOfUniqueNames"})
+	req.Attribute("cn", []string{g.Cn})
+	req.Attribute("uniqueMember", []string{""})
 
-        err = l.Add(req)
-        if err != nil {
-                return err
-        }
+	err = l.Add(req)
+	if err != nil {
+		return err
+	}
 
-        return nil
+	return nil
 }
 
 func deleteGroup(dn string) error {
-        l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
-        if err != nil {
-                return err
-        }
-        defer l.Close()
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%s", os.Getenv("LDAP_HOST"), os.Getenv("LDAP_PORT")))
+	if err != nil {
+		return err
+	}
+	defer l.Close()
 
-        err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
-        if err != nil {
-                return err
-        }
+	err = l.Bind(os.Getenv("LDAP_ADMIN_DN"), os.Getenv("LDAP_ADMIN_PASSWORD"))
+	if err != nil {
+		return err
+	}
 
-        req := ldap.NewDelRequest(dn, nil)
-        err = l.Del(req)
-        if err != nil {
-                return err
-        }
+	req := ldap.NewDelRequest(dn, nil)
+	err = l.Del(req)
+	if err != nil {
+		return err
+	}
 
-        return nil
+	return nil
 }
-
