@@ -32,6 +32,8 @@ services:
       - "5222:5222"
       - "5269:5269"
       - "5281:5281"
+    volumes:
+      - traefik_acme:/acme
     environment:
       - DOMAIN={{MAESTRO_DOMAIN}}
       - LDAP_ADMIN_DN={{LDAP_ADMIN_DN}}
@@ -61,6 +63,8 @@ services:
 volumes:
   prosody-data:
     driver: local
+  traefik_acme:
+    external: true
 
 networks:
   prosody:
