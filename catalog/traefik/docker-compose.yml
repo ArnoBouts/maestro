@@ -26,6 +26,12 @@ services:
     labels:
       - traefik.enable=false
 
+  acme:
+    image: no-cloud.fr/maestro/acme
+    container_name: acme
+    volumes:
+      - acme:/acme
+
 volumes:
   acme:
     driver: local
