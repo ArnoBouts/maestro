@@ -16,7 +16,9 @@ services:
       - --acme=true
       - --acme.storage=/etc/traefik/acme/acme.json
       - --acme.entrypoint=https
-      - --acme.ondemand=true
+      - --acme.ondemand=false
+      - --acme.onhostrule=true
+      - --acme.acmelogging=false
       - --entryPoints=Name:https Address::443 TLS
       - --entryPoints=Name:http Address::80 Redirect.EntryPoint:https
       - --defaultentrypoints=http,https
