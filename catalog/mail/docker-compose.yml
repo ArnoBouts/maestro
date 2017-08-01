@@ -11,29 +11,31 @@ services:
       - "143:143"
       - "587:587"
       - "993:993"
+      - "4190:4190"
     networks:
       - ldap
     volumes:
       - mail-data:/var/mail
       - mail-state:/var/mail-state
       - mail-config:/tmp/docker-mailserver/
+      - traefik_acme:/acme
     environment:
       - ENABLE_SPAMASSASSIN=1
       - ENABLE_CLAMAV=1
       - ENABLE_FAIL2BAN=1
       - ENABLE_POSTGREY=1
       - ONE_DIR=1
-      - DMS_DEBUG=0
+      - DMS_DEBUG=1
       - ENABLE_LDAP=1
       - LDAP_SERVER_HOST=ldap
       - LDAP_SEARCH_BASE=ou=people,dc=home
       - LDAP_BIND_DN=cn=admin,dc=home
       - LDAP_BIND_PW={{LDAP_ADMIN_PASSWORD}}
-      - LDAP_QUERY_FILTER_USER="(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))"
-      - LDAP_QUERY_FILTER_GROUP="(&(mailGroupMember=%s))"
-      - LDAP_QUERY_FILTER_ALIAS="(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))"
-      - DOVECOT_PASS_FILTER="(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
-      - DOVECOT_USER_FILTER="(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - LDAP_QUERY_FILTER_USER=(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - LDAP_QUERY_FILTER_GROUP=(&(mailGroupMember=%s))
+      - LDAP_QUERY_FILTER_ALIAS=(&(mail=%s)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - DOVECOT_PASS_FILTER=(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
+      - DOVECOT_USER_FILTER=(&(cn=%n)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
       - ENABLE_SASLAUTHD=1
       - SASLAUTHD_MECHANISMS=ldap
       - SASLAUTHD_LDAP_SERVER=ldap
@@ -41,6 +43,10 @@ services:
       - SASLAUTHD_LDAP_PASSWORD={{LDAP_ADMIN_PASSWORD}}
       - SASLAUTHD_LDAP_SEARCH_BASE=ou=people,dc=home
       - POSTMASTER_ADDRESS=postmaster@{{MAESTRO_DOMAIN}}
+      - ENABLE_MANAGESIEVE=1
+      - SSL_TYPE=manual
+      - SSL_CERT_PATH=/acme/certs/mail.bouts.me.pem
+      - SSL_KEY_PATH=/acme/certs/mail.bouts.me.pem
     cap_add:
       - NET_ADMIN
     labels:
@@ -53,6 +59,8 @@ volumes:
     driver: local
   mail-config:
     driver: local
+  traefik_acme:
+    external: true
 
 networks:
   ldap:
