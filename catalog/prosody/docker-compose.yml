@@ -14,6 +14,8 @@ services:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
       - prosody-data:/var/lib/postgresql/data
+    labels:
+      - traefik.enable=false
 
   prosody:
     image: no-cloud.fr/maestro/prosody
@@ -59,6 +61,8 @@ services:
     links:
       - prosody
       - prosody-db
+    labels:
+      - traefik.enable=false
 
 volumes:
   prosody-data:
