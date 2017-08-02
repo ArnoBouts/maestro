@@ -121,6 +121,8 @@ func CheckComposeUpdates() {
 					continue
 				}
 
+				service.Checksum = sha
+				Save()
 				log.Println(name + " compose file updated")
 			}
 		}
