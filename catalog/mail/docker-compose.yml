@@ -52,6 +52,37 @@ services:
     labels:
       - traefik.enable=false
 
+  rainloop:
+    image: hardware/rainloop
+    container_name: rainloop
+    networks:
+      - rainloop
+      - traefik
+    links:
+      - rainloop-db
+    volumes:
+      - rainloop-data:/rainloop/data
+    labels:
+      - traefik.port=8888
+      - traefik.frontend.rule=Host:mail.bouts.me
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.entryPoints=http,https
+      - traefik.docker.network=maestro_traefik
+
+  rainloop-db:
+    image: mariadb:10.1
+    container_name: rainloop-db
+    networks:
+      - rainloop
+    volumes:
+      - rainloop-db:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_DATABASE=rainloop
+      - MYSQL_USER=rainloop
+      - MYSQL_PASSWORD=rainloop
+
+
 volumes:
   mail-data:
     driver: local
@@ -61,9 +92,16 @@ volumes:
     driver: local
   traefik_acme:
     external: true
-
+  rainloop-data:
+    driver: local
+  rainloop-db:
+    driver: local
 networks:
+  rainloop:
+    driver: bridge
   ldap:
     external:
       name: maestro_ldap
-
+  traefik:
+    external:
+      name: maestro_traefik
