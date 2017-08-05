@@ -29,6 +29,14 @@ services:
   nextcloud:
     display_name: Nextcloud
     ldap_group: nextcloud
+    params:
+      ADMIN_USER:
+        required: true
+      ADMIN_PASSWORD:
+        required: true
+    install:
+      - service: nextcloud
+        command: occ app:enable user_ldap
 
   mail:
     display_name: Mail Server

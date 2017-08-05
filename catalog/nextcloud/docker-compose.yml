@@ -17,6 +17,8 @@ services:
       - OPCACHE_MEM_SIZE=128
       - CRON_PERIOD=15m
       - DOMAIN=nextcloud.{{MAESTRO_DOMAIN}}
+      - ADMIN_USER={{ADMIN_USER}}
+      - ADMIN_PASSWORD={{ADMIN_PASSWORD}}
       - DB_TYPE=mysql
       - DB_NAME=nextcloud
       - DB_USER=nextcloud
