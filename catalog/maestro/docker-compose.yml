@@ -27,6 +27,8 @@ services:
       - traefik.docker.network=maestro_traefik
 
 volumes:
+  data:
+    driver: local
   maestro:
     external: true
 
