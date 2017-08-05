@@ -26,6 +26,7 @@ services:
       - nextcloud-data:/data
       - nextcloud-config:/config
       - nextcloud-apps:/apps2
+      - maestro_data:/media
     labels:
       - traefik.port=8888
       - traefik.frontend.rule=Host:nextcloud.{{MAESTRO_DOMAIN}}
@@ -58,6 +59,8 @@ volumes:
     driver: local
   nextcloud-db:
     driver: local
+  maestro_data:
+    external: true
 
 networks:
   nextcloud:
