@@ -288,6 +288,7 @@ func add(name string, params map[string](string)) error {
 	// create service
 	var service Service
 	service.Name = name
+	service.Params = params
 	p, err := service.computeParams(params)
 	if err != nil {
 		return err
