@@ -30,12 +30,14 @@ func main() {
 
 	catalog.Load(workdir)
 
+	Load()
+
 	if *restart {
 		Restart()
 		return
 	}
 
-	Load()
+	StartEnabled()
 
 	InstallRequired()
 

@@ -60,7 +60,9 @@ func Load() {
 	if m.Services == nil {
 		m.Services = make(map[string](*Service))
 	}
+}
 
+func StartEnabled() {
 	// start all that should
 	for name, service := range m.Services {
 		service.Name = name
@@ -90,43 +92,72 @@ func InstallRequired() {
 func CheckComposeUpdates() {
 
 	// for all enabled services, check with sha256 if compose was updated in the catalog
-	for name, service := range m.Services {
+	for _, service := range m.Services {
 		if service.Enable {
-			sha, _ := catalog.ComposeSha256(name)
-			if service.Checksum != sha {
-				log.Println(name + " compose file need to be updated")
-				err := service.down()
-				if err != nil {
-					log.Printf("Enable to down service %s : %s", service.Name, err.Error())
-					continue
-				}
 
-				//override compose file
-				p, err := service.computeParams(service.Params)
-				if err != nil {
-					log.Printf("Enable to compute params for the service %s : %s", service.Name, err.Error())
-					continue
-				}
-				service.Params = p
-
-				err = service.configure()
-				if err != nil {
-					log.Printf("Enable to configure service %s : %s", service.Name, err.Error())
-					continue
-				}
-
-				err = service.up()
-				if err != nil {
-					log.Printf("Enable to up service %s : %s", service.Name, err.Error())
-					continue
-				}
-
-				service.Checksum = sha
-				Save()
-				log.Println(name + " compose file updated")
-			}
+			service.checkComposeUpdate()
 		}
 	}
+}
+
+func (service Service) checkComposeUpdate() error {
+
+	sha, _ := catalog.ComposeSha256(service.Name)
+	if service.Checksum != sha {
+		log.Println(service.Name + " compose file need to be updated")
+
+		updater := catalog.GetUpdater(service.Name)
+
+		if updater == "" {
+                	return service.performComposeUpdate(sha)
+		}
+
+		s, founded := m.Services[updater]
+		if !founded {
+			return add(updater, make(map[string](string)))
+		}
+
+		if err := s.pull(); err != nil {
+			return err
+		}
+		return s.up()
+	}
+	return nil
+}
+
+func (service Service) performComposeUpdate(sha string) error {
+
+	err := service.down()
+	if err != nil {
+		log.Printf("Unable to down service %s : %s", service.Name, err.Error())
+		return err
+	}
+
+	//override compose file
+	p, err := service.computeParams(service.Params)
+	if err != nil {
+		log.Printf("Unable to compute params for the service %s : %s", service.Name, err.Error())
+		return err
+	}
+	service.Params = p
+
+	err = service.configure()
+	if err != nil {
+		log.Printf("Unable to configure service %s : %s", service.Name, err.Error())
+		return err
+	}
+
+	err = service.up()
+	if err != nil {
+		log.Printf("Unable to up service %s : %s", service.Name, err.Error())
+		return err
+	}
+
+	service.Checksum = sha
+	Save()
+	log.Println(service.Name + " compose file updated")
+
+	return nil
 }
 
 // PullServices pull all services images
@@ -616,10 +647,15 @@ func UpdateService(writer http.ResponseWriter, request *http.Request) {
 }
 
 func Restart() {
-	var service Service
-	service.Name = "maestro"
+	service := m.Services["maestro"]
 
-	service.up()
+	sha, _ := catalog.ComposeSha256(service.Name)
+	if service.Checksum != sha {
+		log.Println(service.Name + " compose file need to be updated")
+                service.performComposeUpdate(sha)
+	} else {
+		service.up()
+	}
 }
 
 func UpdateServices() {
