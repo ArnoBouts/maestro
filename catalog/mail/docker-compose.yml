@@ -67,7 +67,7 @@ services:
       - traefik.frontend.rule=Host:mail.bouts.me
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
-      - traefik.docker.network=maestro_traefik
+      - traefik.docker.network=traefik
 
   rainloop-db:
     image: mariadb:10.1
@@ -101,7 +101,7 @@ networks:
     driver: bridge
   ldap:
     external:
-      name: maestro_ldap
+      name: ldap
   traefik:
     external:
-      name: maestro_traefik
+      name: traefik

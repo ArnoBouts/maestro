@@ -45,7 +45,7 @@ services:
       - traefik.frontend.entryPoints=http,https
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.rule=Host:xmpp.{{MAESTRO_DOMAIN}}
-      - traefik.docker.network=maestro_traefik
+      - traefik.docker.network=maestro
     links:
       - prosody-db
 
@@ -75,7 +75,7 @@ networks:
     driver: bridge
   ldap:
     external:
-      name: maestro_ldap
+      name: ldap
   traefik:
     external:
-      name: maestro_traefik
+      name: traefik

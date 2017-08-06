@@ -23,4 +23,4 @@ volumes:
 networks:
   ldap:
     external:
-      name: maestro_ldap
+      name: ldap

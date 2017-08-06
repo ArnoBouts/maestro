@@ -24,7 +24,7 @@ services:
       - traefik.frontend.rule=Host:maestro.{{MAESTRO_DOMAIN}}
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
-      - traefik.docker.network=maestro_traefik
+      - traefik.docker.network=traefik
 
 volumes:
   data:
@@ -34,6 +34,8 @@ volumes:
 
 networks:
   ldap:
-    driver: bridge
+    external:
+      name: ldap
   traefik:
-    driver: bridge
+    external:
+      name: traefik
