@@ -100,7 +100,7 @@ func CheckComposeUpdates() {
 	}
 }
 
-func (service Service) checkComposeUpdate() error {
+func (service *Service) checkComposeUpdate() error {
 
 	sha, _ := catalog.ComposeSha256(service.Name)
 	if service.Checksum != sha {
