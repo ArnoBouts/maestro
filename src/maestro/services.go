@@ -103,8 +103,6 @@ func CheckComposeUpdates() {
 func (service Service) checkComposeUpdate() error {
 
 	sha, _ := catalog.ComposeSha256(service.Name)
-	log.Printf("Check - Old checksum : %s", service.Checksum)
-	log.Printf("Check - New checksum : %s", sha)
 	if service.Checksum != sha {
 		log.Println(service.Name + " compose file need to be updated")
 
@@ -127,7 +125,7 @@ func (service Service) checkComposeUpdate() error {
 	return nil
 }
 
-func (service Service) performComposeUpdate(sha string) error {
+func (service *Service) performComposeUpdate(sha string) error {
 
 	err := service.down()
 	if err != nil {
@@ -155,8 +153,6 @@ func (service Service) performComposeUpdate(sha string) error {
 		return err
 	}
 
-	log.Printf("Old checksum : %s", service.Checksum)
-	log.Printf("New checksum : %s", sha)
 	service.Checksum = sha
 	Save()
 	log.Println(service.Name + " compose file updated")
