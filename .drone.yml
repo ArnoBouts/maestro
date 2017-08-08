@@ -14,11 +14,10 @@ pipeline:
       - go get gopkg.in/yaml.v2
       - go get golang.org/x/net/context
       - go get github.com/docker/docker/api
-      - go get github.com/docker/libcompose/docker
-      - go get github.com/docker/libcompose/docker/ctx
-      - go get github.com/docker/libcompose/project
-      - go get github.com/docker/libcompose/project/options
-      - "sed -i -e 's/Tty: true/Tty: false/g' -e 's/StdinOpen: true/StdinOpen: false/g' /go/src/github.com/docker/libcompose/docker/service/service.go"
+      - go get github.com/ArnoBouts/libcompose/docker
+      - go get github.com/ArnoBouts/libcompose/docker/ctx
+      - go get github.com/ArnoBouts/libcompose/project
+      - go get github.com/ArnoBouts/libcompose/project/options
       - go get github.com/jasonlvhit/gocron
       - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o maestro maestro
 
