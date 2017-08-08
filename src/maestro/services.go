@@ -14,6 +14,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/docker/docker/client"
 	composeclient "github.com/docker/libcompose/docker/client"
 	"github.com/docker/libcompose/docker/container"
 	"github.com/docker/libcompose/docker/ctx"
@@ -21,7 +22,6 @@ import (
 	"github.com/docker/libcompose/labels"
 	"github.com/docker/libcompose/project"
 	"github.com/docker/libcompose/project/options"
-	"github.com/docker/docker/client"
 
 	"github.com/gorilla/mux"
 
@@ -342,7 +342,7 @@ func (service *Service) run(cmd catalog.Command) error {
 		return err
 	}
 
-	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{})
+	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{DisableTty: true})
 	return err
 }
 
