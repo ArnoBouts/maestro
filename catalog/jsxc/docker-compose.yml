@@ -19,4 +19,4 @@ services:
 networks:
   traefik:
     external:
-      name: maestro_traefik
+      name: traefik
