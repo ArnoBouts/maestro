@@ -36,7 +36,7 @@ services:
         required: true
     install:
       - service: nextcloud
-        command: occ app:enable user_ldap
+        command: [ "occ", "app:enable", "user_ldap" ]
 
   mail:
     display_name: Mail Server
