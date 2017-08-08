@@ -14,13 +14,13 @@ import (
 
 	"golang.org/x/net/context"
 
-	composeclient "github.com/ArnoBouts/libcompose/docker/client"
-	"github.com/ArnoBouts/libcompose/docker/container"
-	"github.com/ArnoBouts/libcompose/docker/ctx"
-	"github.com/ArnoBouts/libcompose/docker/image"
-	"github.com/ArnoBouts/libcompose/labels"
-	"github.com/ArnoBouts/libcompose/project"
-	"github.com/ArnoBouts/libcompose/project/options"
+	composeclient "github.com/docker/libcompose/docker/client"
+	"github.com/docker/libcompose/docker/container"
+	"github.com/docker/libcompose/docker/ctx"
+	"github.com/docker/libcompose/docker/image"
+	"github.com/docker/libcompose/labels"
+	"github.com/docker/libcompose/project"
+	"github.com/docker/libcompose/project/options"
 	"github.com/docker/docker/client"
 
 	"github.com/gorilla/mux"
