@@ -3,7 +3,7 @@ version: '2'
 services:
   traefik:
     image: emilevauge/traefik
-    container_name: traefik_test
+    container_name: traefik
     networks:
       - traefik
     ports:
