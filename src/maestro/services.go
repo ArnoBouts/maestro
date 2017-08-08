@@ -342,7 +342,7 @@ func (service *Service) run(cmd catalog.Command) error {
 		return err
 	}
 
-	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{DisableTty: true})
+	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{DisableTty: true, Remove: true})
 	return err
 }
 
