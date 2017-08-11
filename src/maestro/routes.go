@@ -16,7 +16,6 @@ type Route struct {
 type Routes []Route
 
 var routes = Routes{
-	Route{"Static", "GET", "/", http.StripPrefix("/", http.FileServer(http.Dir("static/")))},
 
 	Route{"Catalog", "GET", "/catalog", catalog.List},
 	Route{"Catalog", "GET", "/services", ListService},
