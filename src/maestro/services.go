@@ -647,6 +647,16 @@ func UpdateService(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+func ListService(writer http.ResponseWriter, request *http.Request) {
+
+	payload, err := json.Marshal(m)
+        if err != nil {
+                http.Error(writer, err.Error(), 500)
+        }
+        writer.Header().Add("Content-Type", "application/json")
+        writer.Write(payload)
+}
+
 func Restart() {
 	service := m.Services["maestro"]
 
