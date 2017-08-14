@@ -10,9 +10,9 @@ import (
 )
 
 type Group struct {
-	Dn      string
-	Cn      string
-	Members []string
+	Dn      string   `json:"dn"`
+	Cn      string   `json:"cn"`
+	Members []string `json:"members"`
 }
 
 func Groups(writer http.ResponseWriter, request *http.Request) {
