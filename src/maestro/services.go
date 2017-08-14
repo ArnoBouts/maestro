@@ -336,6 +336,17 @@ func add(name string, params map[string](string)) error {
 	return nil
 }
 
+func remove(name string) error {
+
+	service := m.Services[name]
+
+	err := service.down()
+	// on vire les fichiers et le dossier
+	delete(m.Services, name)
+	Save()
+	return nil
+}
+
 func (service *Service) run(cmd catalog.Command) error {
 	project, err := getProject(service.Name)
 	if err != nil {
@@ -614,6 +625,16 @@ func AddService(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// RemoveService Resource that uninstall the provided service
+func RemoveService(writer http.ResponseWriter, request *http.Request) {
+	name := mux.Vars(request)["service"]
+
+	if err := remove(name); err != nil {
+		http.Error(writer, err.Error(), 500)
+		return
+	}
+}
+
 func (service *Service) update() error {
 	if err := service.pull(); err != nil {
 		return err
@@ -665,6 +686,7 @@ func Restart() {
 		log.Println(service.Name + " compose file need to be updated")
 		service.performComposeUpdate(sha)
 	} else {
+		service.down()
 		service.up()
 	}
 }
