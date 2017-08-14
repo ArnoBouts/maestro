@@ -340,7 +340,7 @@ func remove(name string) error {
 
 	service := m.Services[name]
 
-	err := service.down()
+	service.down()
 	// on vire les fichiers et le dossier
 	delete(m.Services, name)
 	Save()
