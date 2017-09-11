@@ -3,19 +3,17 @@ version: '2'
 services:
 
   kresus:
-    #image: bnjbvr/kresus
-    build: kresus/.
+    image: bnjbvr/kresus
     container_name: kresus
     networks:
       - kresus
     volumes:
-      - /var/lib/maestro/apps/kresus/data:/home/user/data
+      - kresus-data:/home/user/data
     labels:
       - traefik.enable=false
 
   kresus-nginx:
-    #image: nginx
-    build: nginx/.
+    image: no-cloud.fr/maestro/kresus-nginx
     container_name: kresus-nginx
     networks:
       - kresus
@@ -23,10 +21,14 @@ services:
       - traefik
     labels:
       - traefik.port=80
-      - traefik.frontend.rule=Host:kresus.no-cloud.fr
+      - traefik.frontend.rule=Host:kresus.{{MAESTRO_DOMAIN}}
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
       - traefik.docker.network=traefik
+
+volumes:
+  kresus-data:
+    driver: local
 
 networks:
   kresus:
