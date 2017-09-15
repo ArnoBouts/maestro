@@ -1,4 +1,5 @@
 FROM debian:jessie
+# FROM_DIGEST sha256:1
 
 WORKDIR /maestro
 
