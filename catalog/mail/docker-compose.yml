@@ -42,6 +42,7 @@ services:
       - SASLAUTHD_LDAP_BIND_DN=cn=admin,dc=home
       - SASLAUTHD_LDAP_PASSWORD={{LDAP_ADMIN_PASSWORD}}
       - SASLAUTHD_LDAP_SEARCH_BASE=ou=people,dc=home
+      - SASLAUTHD_LDAP_FILTER=(&(cn=%U)(&(objectClass=person)(memberof=cn=mail,ou=groups,dc=home)))
       - POSTMASTER_ADDRESS=postmaster@{{MAESTRO_DOMAIN}}
       - ENABLE_MANAGESIEVE=1
       - SSL_TYPE=manual
