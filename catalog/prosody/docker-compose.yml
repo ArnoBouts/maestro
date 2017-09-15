@@ -13,7 +13,7 @@ services:
       - MYSQL_PASSWORD=prosody
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
-      - prosody-data:/var/lib/postgresql/data
+      - prosody-data:/var/lib/mysql
     labels:
       - traefik.enable=false
 
