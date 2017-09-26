@@ -51,7 +51,7 @@ func main() {
 }
 
 func update() {
-	gocron.Every(1).Minute().Do(UpdateServices)
+	gocron.Every(15).Minutes().Do(UpdateServices)
 
 	<-gocron.Start()
 }
