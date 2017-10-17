@@ -14,7 +14,6 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/docker/docker/client"
 	composeclient "github.com/docker/libcompose/docker/client"
 	"github.com/docker/libcompose/docker/container"
 	"github.com/docker/libcompose/docker/ctx"
@@ -260,10 +259,6 @@ func outOfSync(ctx context.Context, c *container.Container, p project.Project, s
 
 	image, err := image.InspectImage(ctx, cli, c.ImageConfig())
 	if err != nil {
-		if client.IsErrImageNotFound(err) {
-			log.Printf("Image %s do not exist, do not know if it's out of sync", c.Image())
-			return false, nil
-		}
 		return false, err
 	}
 
