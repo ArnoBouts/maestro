@@ -50,7 +50,7 @@ services:
       - prosody-db
 
   spectrum:
-    image: no-cloud.fr/maestro/spectrum:maestro
+    image: no-cloud.fr/maestro/spectrum:latest
     container_name: spectrum
     networks:
       - prosody
