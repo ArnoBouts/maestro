@@ -34,9 +34,6 @@ services:
         required: true
       ADMIN_PASSWORD:
         required: true
-    install:
-      - service: nextcloud
-        command: [ "occ", "app:enable", "user_ldap" ]
 
   mail:
     display_name: Mail Server

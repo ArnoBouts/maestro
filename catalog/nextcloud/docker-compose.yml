@@ -3,7 +3,7 @@ version: '2'
 services:
 
   nextcloud:
-    image: wonderfall/nextcloud
+    image: no-cloud.fr/maestro/nextcloud
     container_name: nextcloud
     networks:
       - nextcloud
@@ -12,32 +12,28 @@ services:
     links:
       - nextcloud-db
     environment:
-      - UPLOAD_MAX_SIZE=10G
-      - APC_SHM_SIZE=128M
-      - OPCACHE_MEM_SIZE=128
-      - CRON_PERIOD=15m
       - DOMAIN=nextcloud.{{MAESTRO_DOMAIN}}
-      - ADMIN_USER={{ADMIN_USER}}
-      - ADMIN_PASSWORD={{ADMIN_PASSWORD}}
-      - DB_TYPE=mysql
-      - DB_NAME=nextcloud
-      - DB_USER=nextcloud
-      - DB_PASSWORD=nextcloud
-      - DB_HOST=nextcloud-db
+      - NEXTCLOUD_ADMIN_USER={{ADMIN_USER}}
+      - NEXTCLOUD_ADMIN_PASSWORD={{ADMIN_PASSWORD}}
+      - LDAP_ADMIN_PASSWORD={{LDAP_ADMIN_PASSWORD}}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_HOST=nextcloud-db
     volumes:
-      - nextcloud-data:/data
-      - nextcloud-config:/config
-      - nextcloud-apps:/apps2
-      - maestro_data:/media
+      - nextcloud-data:/var/www/html/data
+      - nextcloud-config:/var/www/html/config
+      - nextcloud-apps:/var/www/html/custom_apps
+      - media:/media
     labels:
-      - traefik.port=8888
+      - traefik.port=80
       - traefik.frontend.rule=Host:nextcloud.{{MAESTRO_DOMAIN}}
       - traefik.frontend.passHostHeader=true
       - traefik.frontend.entryPoints=http,https
       - traefik.docker.network=traefik
 
   nextcloud-db:
-    image: mariadb:10.1
+    image: mariadb
     container_name: nextcloud-db
     restart: always
     networks:
@@ -61,7 +57,7 @@ volumes:
     driver: local
   nextcloud-db:
     driver: local
-  maestro_data:
+  media:
     external: true
 
 networks:
