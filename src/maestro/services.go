@@ -652,6 +652,36 @@ func (service *Service) update() error {
 	return s.up()
 }
 
+func (service *Service) backup() error {
+
+	catalogApp := catalog.GetApp(service.Name)
+	if catalogApp == nil {
+		return fmt.Errorf("App '%s' doesn't exist.", service.Name)
+	}
+
+	if catalogApp.Backup != nil {
+		for _, cmd := range catalogApp.Backup {
+			err := service.run(cmd)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// BackupService
+func BackupService(writer http.ResponseWriter, request *http.Request) {
+
+	var service Service
+	service.Name = mux.Vars(request)["service"]
+
+	if err := service.backup(); err != nil {
+		http.Error(writer, err.Error(), 500)
+	}
+}
+
 // UpdateService Resource that update the provided service
 func UpdateService(writer http.ResponseWriter, request *http.Request) {
 
@@ -691,4 +721,13 @@ func UpdateServices() {
 	PullServices()
 
 	CheckImageToUpdate()
+}
+
+func BackupServices() {
+
+	for _, service := range m.Services {
+		if service.Enable {
+			service.backup()
+		}
+	}
 }

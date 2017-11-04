@@ -27,6 +27,8 @@ type App struct {
 	Params      map[string]Param `yaml:"params"`
 	LdapGroup   string           `yaml:"ldap_group"`
 	Install     []Command        `yaml:"install"`
+	Backup			[]Command        `yaml:"backup"`
+	Restore			[]Command        `yaml:"restore"`
 }
 
 // Param define a parameter of an app
