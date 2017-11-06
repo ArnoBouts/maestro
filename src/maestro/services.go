@@ -30,6 +30,7 @@ import (
 
 type maestro struct {
 	Services map[string](*Service)
+	Backup Backup
 }
 
 // Service is an installed service
@@ -38,6 +39,15 @@ type Service struct {
 	Enable   bool
 	Checksum string
 	Params   map[string](string)
+}
+
+type Backup struct {
+	Sshfs Sshfs
+}
+
+type Sshfs struct {
+	Host string
+	Password string
 }
 
 var m = new(maestro)
@@ -270,6 +280,27 @@ func Save() {
 
 	content, _ := yaml.Marshal(&m)
 	ioutil.WriteFile(workdir+"/services/services.yml", content, 0644)
+}
+
+func SaveBackupEnv() error {
+	f, err := os.OpenFile(workdir+"/services/backup.env", os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(fmt.Sprintf("SSHFS=%s\n", m.Backup.Sshfs.Host))
+	if err != nil {
+		return err
+	}
+
+	_, err = f.WriteString(fmt.Sprintf("SSHFS_PASSWORD=%s\n", m.Backup.Sshfs.Password))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func add(name string, params map[string](string)) error {

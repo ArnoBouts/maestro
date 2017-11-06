@@ -1,5 +1,5 @@
 package main
 
 type Conf struct {
-	Domain string
+	Domain string	 `yaml:"domain"`
 }
