@@ -8,6 +8,9 @@ services:
         required: true
       LDAP_ADMIN_PASSWORD:
         required: true
+    backup:
+      - service: backup
+        command: [create]
 
   traefik:
     display_name: Traefik

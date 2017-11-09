@@ -32,6 +32,22 @@ services:
     image: no-cloud.fr/maestro/gui:latest
     container_name: maestro-gui
 
+  backup:
+    image: no-cloud.fr/maestro/borg
+    container_name: maestro-backup
+    volumes_from:
+      - maestro
+    env_file:
+      - ../backup.env
+    environment:
+      - SSHFS_REPO=maestro
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+
 volumes:
   data:
     driver: local
