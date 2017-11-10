@@ -690,6 +690,9 @@ func (service *Service) backup() error {
 		return fmt.Errorf("App '%s' doesn't exist.", service.Name)
 	}
 
+	log.Println("Backup :")
+	log.Println(catalogApp.Backup)
+
 	if catalogApp.Backup != nil {
 		for _, cmd := range catalogApp.Backup {
 			err := service.run(cmd)
@@ -697,7 +700,9 @@ func (service *Service) backup() error {
 				return err
 			}
 		}
-	}
+	} else {
+	        log.Printf("Backup is not configured for service '%s'", service.Name)
+        }
 
 	return nil
 }
