@@ -13,6 +13,11 @@ services:
     volumes:
       - ldap:/var/lib/ldap
       - ldap:/etc/ldap/slapd.d
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: "5"
     labels:
       - traefik.enable=false
 
