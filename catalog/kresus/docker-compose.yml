@@ -9,6 +9,9 @@ services:
       - kresus
     volumes:
       - kresus-data:/home/user/data
+    environment:
+      - KRESUS_EMAIL_HOST=mail.{{MAESTRO_DOMAIN}}
+      - KRESUS_EMAIL_PORT=587
     labels:
       - traefik.enable=false
 
