@@ -10,6 +10,8 @@ services:
       - 80:80
       - 443:443
     command:
+#      - --loglevel=DEBUG
+#      - --accesslog.filepath=/dev/stdout
       - --web=false
       - --docker
       - --docker.domain=domain.local
