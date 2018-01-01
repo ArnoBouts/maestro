@@ -1,0 +1,57 @@
+version: '2'
+
+services:
+
+  guacd:
+    image: guacamole/guacd
+    container_name: guacd
+    networks:
+      - guacamole
+
+  guacamole:
+    image: guacamole/guacamole
+    container_name: guacamole
+    networks:
+      - guacamole
+      - traefik
+      - ldap
+    environment:
+      - GUACD_HOSTNAME=guacd
+      - LDAP_HOSTNAME=ldap
+      - LDAP_USER_BASE_DN=ou=people,dc=home
+      - LDAP_USERNAME_ATTRIBUTE=cn
+      - MYSQL_HOSTNAME=guacamole-db
+      - MYSQL_DATABASE=guacamole
+      - MYSQL_USER=guacamole
+      - MYSQL_PASSWORD=guacamole
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=Host:guacamole.{{MAESTRO_DOMAIN}}
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.entryPoints=http,https
+      - traefik.docker.network=traefik
+
+  guacamole-db:
+    image: no-cloud.fr/maestro/guacamole-mariadb
+    container_name: guacamole-db
+    networks:
+      - guacamole
+    volumes:
+      - guacamole-db:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=guacamole
+      - MYSQL_USER=guacamole
+      - MYSQL_PASSWORD=guacamole
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+
+networks:
+  guacamole:
+    driver: bridge
+  traefik:
+    external: true
+  ldap:
+    external: true
+
+volumes:
+  guacamole-db:
+    driver: local

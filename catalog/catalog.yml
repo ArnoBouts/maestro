@@ -44,3 +44,10 @@ services:
     install:
       - service: mail
         command: [maestro-generate-dkim-config]
+
+  guacamole:
+    display_name: Guacamole
+
+  firefox:
+    display_name: Firefox
+    ldap_group: firefox
