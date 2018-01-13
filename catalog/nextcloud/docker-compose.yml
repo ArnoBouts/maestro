@@ -21,6 +21,7 @@ services:
       - MYSQL_PASSWORD=nextcloud
       - MYSQL_HOST=nextcloud-db
     volumes:
+      - nextcloud:/var/www/html
       - nextcloud-data:/var/www/html/data
       - nextcloud-config:/var/www/html/config
       - nextcloud-apps:/var/www/html/custom_apps
@@ -49,6 +50,8 @@ services:
       - traefik.enable=false
 
 volumes:
+  nextcloud:
+    driver: local
   nextcloud-config:
     driver: local
   nextcloud-apps:
