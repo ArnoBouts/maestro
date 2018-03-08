@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  pyload:
+    image: no-cloud.fr/maestro/pyload
+    container_name: pyload
+    networks:
+      - traefik
+      - guacamole
+    ports:
+      - 7227:7227
+    volumes:
+      - media:/media
+    labels:
+      - traefik.webinterface.port=8000
+      - traefik.webinterface.frontend.rule=Host:pyload.{{MAESTRO_DOMAIN}}
+      - traefik.webinterface.frontend.passHostHeader=true
+      - traefik.webinterface.frontend.entryPoints=http,https
+
+  filebot:
+    image: rednoah/filebot:watcher
+    container_name: filebot
+    volumes:
+      - media:/media
+    command:
+      - /media/Media/Downloads
+      - --lang
+      - fr
+      - --output
+      - /media/Media
+      - --action
+      - move
+      - --def
+      - movieFormat="Movies/{n.replaceAll(/[\`\u00b4\u2018\u2019\u02bb]/, "'"'"'").replaceAll(/[\u201c\u201d]/, '"'"'""'"'"')} {' CD'+pi}"
+      - seriesFormat="Series/{n}/{episode.special ? 'Special':'Season '+s.pad(2)}/{n} - {episode.special ? 'S00E'+special.pad(2):s00e00} - {t.replaceAll(/[`´‘’ʻ]/, /'/).replaceAll(/[!?.]+$$/).replacePart(', Part $$1')}{'.'+lang}"
+      - artwork=n
+      - clean=y
+
+networks:
+  traefik:
+    external: true
+  guacamole:
+    external:
+      name: guacamole_guacamole
+
+volumes:
+  media:
+    external: true

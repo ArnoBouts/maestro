@@ -51,3 +51,6 @@ services:
   firefox:
     display_name: Firefox
     ldap_group: firefox
+
+  pyload:
+    display_name: Pyload
