@@ -27,6 +27,7 @@ var routes = Routes{
 	Route{"Catalog", "PATCH", "/services/{service}/down", DownService},
 	Route{"Catalog", "PATCH", "/services/{service}/update", UpdateService},
 	Route{"Catalog", "PATCH", "/services/{service}/backup", BackupService},
+	Route{"Catalog", "GET", "/services/{service}/backup", BackupListArchivesService},
 
 	Route{"Persons", "GET", "/persons", ldap.Persons},
 	Route{"Persons", "POST", "/persons", ldap.AddPerson},

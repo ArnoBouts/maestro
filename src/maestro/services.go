@@ -30,7 +30,7 @@ import (
 
 type maestro struct {
 	Services map[string](*Service)
-	Backup Backup
+	Backup   Backup
 }
 
 // Service is an installed service
@@ -46,7 +46,7 @@ type Backup struct {
 }
 
 type Sshfs struct {
-	Host string
+	Host     string
 	Password string
 }
 
@@ -374,12 +374,25 @@ func remove(name string) error {
 }
 
 func (service *Service) run(cmd catalog.Command) error {
+	return service.run2(cmd, nil)
+}
+
+func (service *Service) run2(cmd catalog.Command, w *os.File) error {
 	project, err := getProject(service.Name)
 	if err != nil {
 		return err
 	}
 
+	if w != nil {
+		stdout := os.Stdout
+		defer func() {
+			os.Stdout = stdout
+		}()
+		os.Stdout = w
+	}
+
 	_, err = project.Run(context.Background(), cmd.Service, cmd.Command, options.Run{DisableTty: true, Remove: true})
+
 	return err
 }
 
@@ -683,6 +696,31 @@ func (service *Service) update() error {
 	return s.up()
 }
 
+func (service *Service) backupListArchives(writer http.ResponseWriter) error {
+
+	catalogApp := catalog.GetApp(service.Name)
+	if catalogApp == nil {
+		return fmt.Errorf("App '%s' doesn't exist.", service.Name)
+	}
+
+	cmd := catalog.Command{Service: "backup", Command: []string{"list"}}
+
+	log.Println("backup list")
+	log.Println(cmd)
+	r, w, _ := os.Pipe()
+	defer w.Close()
+	service.run2(cmd, w)
+
+	stdout, _ := ioutil.ReadAll(r)
+	log.Println("Backup archives :")
+
+	log.Println(stdout)
+
+	writer.Write(stdout)
+
+	return nil
+}
+
 func (service *Service) backup() error {
 
 	catalogApp := catalog.GetApp(service.Name)
@@ -701,8 +739,8 @@ func (service *Service) backup() error {
 			}
 		}
 	} else {
-	        log.Printf("Backup is not configured for service '%s'", service.Name)
-        }
+		log.Printf("Backup is not configured for service '%s'", service.Name)
+	}
 
 	return nil
 }
@@ -714,6 +752,16 @@ func BackupService(writer http.ResponseWriter, request *http.Request) {
 	service.Name = mux.Vars(request)["service"]
 
 	if err := service.backup(); err != nil {
+		http.Error(writer, err.Error(), 500)
+	}
+}
+
+func BackupListArchivesService(writer http.ResponseWriter, request *http.Request) {
+
+	var service Service
+	service.Name = mux.Vars(request)["service"]
+
+	if err := service.backupListArchives(writer); err != nil {
 		http.Error(writer, err.Error(), 500)
 	}
 }
@@ -732,11 +780,11 @@ func UpdateService(writer http.ResponseWriter, request *http.Request) {
 func ListService(writer http.ResponseWriter, request *http.Request) {
 
 	payload, err := json.Marshal(m)
-        if err != nil {
-                http.Error(writer, err.Error(), 500)
-        }
-        writer.Header().Add("Content-Type", "application/json")
-        writer.Write(payload)
+	if err != nil {
+		http.Error(writer, err.Error(), 500)
+	}
+	writer.Header().Add("Content-Type", "application/json")
+	writer.Write(payload)
 }
 
 func Restart() {
