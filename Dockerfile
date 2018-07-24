@@ -1,5 +1,5 @@
 FROM debian:jessie
-# FROM_DIGEST sha256:024b0f9f11ab31fd88ff3e31a5cefa5e0dbeb8f3e3d5517a68cee9314072fed1
+# FROM_DIGEST sha256:a64a7d8ff7ff87edb78004ef0b159661546d2ddbd82772128b344c90cf8422ab
 
 WORKDIR /maestro
 
